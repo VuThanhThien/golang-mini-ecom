@@ -1,0 +1,302 @@
+basePath: /api
+definitions:
+  models.CreatePostRequest:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      image:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      user:
+        type: string
+    required:
+    - content
+    - image
+    - title
+    type: object
+  models.SignInInput:
+    properties:
+      email:
+        example: admin@gmail.com
+        type: string
+      password:
+        example: 123456@Abc
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  models.SignUpInput:
+    properties:
+      email:
+        example: admin@gmail.com
+        type: string
+      name:
+        example: admin
+        type: string
+      password:
+        example: 123456@Abc
+        minLength: 8
+        type: string
+      passwordConfirm:
+        example: 123456@Abc
+        type: string
+      photo:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - passwordConfirm
+    - photo
+    type: object
+  models.UpdatePost:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      image:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      user:
+        type: string
+    type: object
+  models.UserResponse:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      photo:
+        type: string
+      provider:
+        type: string
+      role:
+        type: string
+      updated_at:
+        type: string
+    type: object
+host: http://localhost:8000
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server celler server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Example API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: SignInUser
+      parameters:
+      - description: Login payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/models.SignInInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: SignInUser
+      tags:
+      - auth
+  /auth/refresh:
+    get:
+      consumes:
+      - application/json
+      description: RefreshAccessToken
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: RefreshAccessToken
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: SignUpUser
+      parameters:
+      - description: Register payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/models.SignUpInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+      summary: SignUpUser
+      tags:
+      - auth
+  /posts:
+    get:
+      consumes:
+      - application/json
+      description: FindPosts
+      parameters:
+      - default: 10
+        example: 5
+        in: query
+        name: limit
+        type: integer
+      - default: 1
+        example: 1
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - Bearer: []
+      summary: FindPosts
+      tags:
+      - post
+    post:
+      consumes:
+      - application/json
+      description: CreatePost
+      parameters:
+      - description: CreatePost payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: CreatePost
+      tags:
+      - post
+  /posts/:postId:
+    delete:
+      consumes:
+      - application/json
+      description: DeletePost
+      parameters:
+      - description: Post ID
+        in: path
+        name: postId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - Bearer: []
+      summary: DeletePost
+      tags:
+      - post
+    get:
+      consumes:
+      - application/json
+      description: FindPostById
+      parameters:
+      - description: Post ID
+        in: path
+        name: postId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - Bearer: []
+      summary: FindPostById
+      tags:
+      - post
+    put:
+      consumes:
+      - application/json
+      description: UpdatePost
+      parameters:
+      - description: UpdatePost payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdatePost'
+      - description: Post ID
+        in: path
+        name: postId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: UpdatePost
+      tags:
+      - post
+  /users/me:
+    get:
+      consumes:
+      - application/json
+      description: GetMe
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+      security:
+      - Bearer: []
+      summary: GetMe
+      tags:
+      - users
+securityDefinitions:
+  BasicAuth:
+    type: basic
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
