@@ -27,7 +27,11 @@ func init() {
 
 	initializers.ConnectDB(&config)
 	initializers.InitRedis(&config)
-	initializers.Migrate()
+	if err := initializers.Migrate(); err != nil {
+		log.Fatal("Failed to run database migrations", err)
+	}
+	fmt.Println("👍 Migration complete")
+
 	server = gin.Default()
 }
 

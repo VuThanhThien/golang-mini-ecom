@@ -1,7 +1,6 @@
 package initializers
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/VuThanhThien/golang-gorm-postgres/internal/models"
@@ -16,8 +15,7 @@ func init() {
 	ConnectDB(&config)
 }
 
-func Migrate() {
+func Migrate() error {
 	DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
-	DB.AutoMigrate(&models.User{}, &models.Post{})
-	fmt.Println("👍 Migration complete")
+	return DB.AutoMigrate(&models.User{}, &models.Post{})
 }
