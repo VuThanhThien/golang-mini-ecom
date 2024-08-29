@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/VuThanhThien/golang-gorm-postgres/models"
+	"github.com/VuThanhThien/golang-gorm-postgres/internal/models"
+	"github.com/VuThanhThien/golang-gorm-postgres/internal/models/dto"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -24,13 +25,13 @@ func NewUserController(DB *gorm.DB) UserController {
 //		@Tags			users
 //		@Accept			json
 //		@Produce		json
-//		@Success		200	{object}	models.UserResponse
+//		@Success		200	{object}	dto.UserResponse
 //	 	@Security		Bearer
 //		@Router			/users/me [get]
 func (uc *UserController) GetMe(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser").(models.User)
 
-	userResponse := &models.UserResponse{
+	userResponse := &dto.UserResponse{
 		ID:        currentUser.ID,
 		Name:      currentUser.Name,
 		Email:     currentUser.Email,

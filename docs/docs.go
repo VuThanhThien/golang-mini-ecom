@@ -44,7 +44,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SignInInput"
+                            "$ref": "#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models.SignInInput"
                         }
                     }
                 ],
@@ -101,7 +101,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SignUpInput"
+                            "$ref": "#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models.SignUpInput"
                         }
                     }
                 ],
@@ -109,7 +109,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.UserResponse"
+                            "$ref": "#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models.UserResponse"
                         }
                     }
                 }
@@ -175,7 +175,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.CreatePostRequest"
+                            "$ref": "#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models.CreatePostRequest"
                         }
                     }
                 ],
@@ -242,7 +242,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UpdatePost"
+                            "$ref": "#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models.UpdatePost"
                         }
                     },
                     {
@@ -313,7 +313,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.UserResponse"
+                            "$ref": "#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models.UserResponse"
                         }
                     }
                 }
@@ -321,7 +321,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "models.CreatePostRequest": {
+        "github_com_VuThanhThien_golang-gorm-postgres_internal_models.CreatePostRequest": {
             "type": "object",
             "required": [
                 "content",
@@ -349,7 +349,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.SignInInput": {
+        "github_com_VuThanhThien_golang-gorm-postgres_internal_models.SignInInput": {
             "type": "object",
             "required": [
                 "email",
@@ -366,7 +366,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.SignUpInput": {
+        "github_com_VuThanhThien_golang-gorm-postgres_internal_models.SignUpInput": {
             "type": "object",
             "required": [
                 "email",
@@ -398,7 +398,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UpdatePost": {
+        "github_com_VuThanhThien_golang-gorm-postgres_internal_models.UpdatePost": {
             "type": "object",
             "properties": {
                 "content": {
@@ -421,7 +421,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UserResponse": {
+        "github_com_VuThanhThien_golang-gorm-postgres_internal_models.UserResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -467,7 +467,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "http://localhost:8000",
+	Host:             "localhost:8000",
 	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "Swagger Example API",

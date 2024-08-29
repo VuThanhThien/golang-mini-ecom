@@ -1,23 +1,11 @@
-package models
+package dto
 
 import (
 	"time"
 
+	"github.com/VuThanhThien/golang-gorm-postgres/internal/models"
 	"github.com/google/uuid"
 )
-
-type User struct {
-	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
-	Name      string    `gorm:"type:varchar(255);not null"`
-	Email     string    `gorm:"uniqueIndex;not null"`
-	Password  string    `gorm:"not null"`
-	Role      string    `gorm:"type:varchar(255);not null"`
-	Provider  string    `gorm:"not null"`
-	Photo     string    `gorm:"not null"`
-	Verified  bool      `gorm:"not null"`
-	CreatedAt time.Time `gorm:"not null"`
-	UpdatedAt time.Time `gorm:"not null"`
-}
 
 type SignUpInput struct {
 	Name            string `json:"name" binding:"required" example:"admin"`
@@ -41,4 +29,29 @@ type UserResponse struct {
 	Provider  string    `json:"provider"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type UserListResponse struct {
+	Orders []UserResponse `json:"users"`
+	Total  int            `json:"total"`
+}
+
+func ToOrderListResponse(orders []models.User) UserListResponse {
+	summaries := make([]UserResponse, len(orders))
+	for i, order := range orders {
+		summaries[i] = UserResponse{
+			ID:        order.ID,
+			CreatedAt: order.CreatedAt,
+			UpdatedAt: order.UpdatedAt,
+			Name:      order.Name,
+			Email:     order.Email,
+			Role:      order.Role,
+			Photo:     order.Photo,
+			Provider:  order.Provider,
+		}
+	}
+	return UserListResponse{
+		Orders: summaries,
+		Total:  len(summaries),
+	}
 }

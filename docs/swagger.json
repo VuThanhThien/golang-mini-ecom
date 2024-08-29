@@ -15,7 +15,7 @@
         },
         "version": "1.0"
     },
-    "host": "http://localhost:8000",
+    "host": "localhost:8000",
     "basePath": "/api",
     "paths": {
         "/auth/login": {
@@ -38,7 +38,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SignInInput"
+                            "$ref": "#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models.SignInInput"
                         }
                     }
                 ],
@@ -95,7 +95,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SignUpInput"
+                            "$ref": "#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models.SignUpInput"
                         }
                     }
                 ],
@@ -103,7 +103,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.UserResponse"
+                            "$ref": "#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models.UserResponse"
                         }
                     }
                 }
@@ -169,7 +169,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.CreatePostRequest"
+                            "$ref": "#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models.CreatePostRequest"
                         }
                     }
                 ],
@@ -236,7 +236,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UpdatePost"
+                            "$ref": "#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models.UpdatePost"
                         }
                     },
                     {
@@ -307,7 +307,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.UserResponse"
+                            "$ref": "#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models.UserResponse"
                         }
                     }
                 }
@@ -315,7 +315,7 @@
         }
     },
     "definitions": {
-        "models.CreatePostRequest": {
+        "github_com_VuThanhThien_golang-gorm-postgres_internal_models.CreatePostRequest": {
             "type": "object",
             "required": [
                 "content",
@@ -343,7 +343,7 @@
                 }
             }
         },
-        "models.SignInInput": {
+        "github_com_VuThanhThien_golang-gorm-postgres_internal_models.SignInInput": {
             "type": "object",
             "required": [
                 "email",
@@ -360,7 +360,7 @@
                 }
             }
         },
-        "models.SignUpInput": {
+        "github_com_VuThanhThien_golang-gorm-postgres_internal_models.SignUpInput": {
             "type": "object",
             "required": [
                 "email",
@@ -392,7 +392,7 @@
                 }
             }
         },
-        "models.UpdatePost": {
+        "github_com_VuThanhThien_golang-gorm-postgres_internal_models.UpdatePost": {
             "type": "object",
             "properties": {
                 "content": {
@@ -415,7 +415,7 @@
                 }
             }
         },
-        "models.UserResponse": {
+        "github_com_VuThanhThien_golang-gorm-postgres_internal_models.UserResponse": {
             "type": "object",
             "properties": {
                 "created_at": {

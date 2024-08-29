@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/VuThanhThien/golang-gorm-postgres/initializers"
-	"github.com/VuThanhThien/golang-gorm-postgres/models"
+	"github.com/VuThanhThien/golang-gorm-postgres/internal/initializers"
+	"github.com/VuThanhThien/golang-gorm-postgres/internal/models"
 	"github.com/VuThanhThien/golang-gorm-postgres/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -42,7 +42,7 @@ func DeserializeUser() gin.HandlerFunc {
 		result := initializers.DB.First(&user, "id = ?", fmt.Sprint(sub))
 
 		if result.Error != nil {
-			ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user belonging to this token no logger exists"})
+			ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user belonging to this token no longger exists"})
 			return
 		}
 

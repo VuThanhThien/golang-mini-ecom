@@ -6,19 +6,22 @@ import (
 	"strings"
 	"time"
 
-	"github.com/VuThanhThien/golang-gorm-postgres/initializers"
-	"github.com/VuThanhThien/golang-gorm-postgres/models"
+	"github.com/VuThanhThien/golang-gorm-postgres/internal/api/services"
+	"github.com/VuThanhThien/golang-gorm-postgres/internal/initializers"
+	"github.com/VuThanhThien/golang-gorm-postgres/internal/models"
+	"github.com/VuThanhThien/golang-gorm-postgres/internal/models/dto"
 	"github.com/VuThanhThien/golang-gorm-postgres/utils"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type AuthController struct {
-	DB *gorm.DB
+	DB      *gorm.DB
+	service services.AuthServiceInterface
 }
 
-func NewAuthController(DB *gorm.DB) AuthController {
-	return AuthController{DB}
+func NewAuthController(DB *gorm.DB, service services.AuthServiceInterface) AuthController {
+	return AuthController{DB, service}
 }
 
 // SignUpUser godoc
@@ -26,13 +29,13 @@ func NewAuthController(DB *gorm.DB) AuthController {
 //	@Summary		SignUpUser
 //	@Description	SignUpUser
 //	@Tags			auth
-//	@Param			payload	body		models.SignUpInput	true	"Register payload"
+//	@Param			payload	body		dto.SignUpInput	true	"Register payload"
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	models.UserResponse
+//	@Success		200	{object}	dto.UserResponse
 //	@Router			/auth/register [post]
 func (ac *AuthController) SignUpUser(ctx *gin.Context) {
-	var payload *models.SignUpInput
+	var payload *dto.SignUpInput
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -63,17 +66,17 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 		UpdatedAt: now,
 	}
 
-	result := ac.DB.Create(&newUser)
+	result := ac.service.SignUpUser(&newUser)
 
-	if result.Error != nil && strings.Contains(result.Error.Error(), "duplicate key value violates unique") {
+	if result != nil && strings.Contains(result.Error(), "duplicate key value violates unique") {
 		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "User with that email already exists"})
 		return
-	} else if result.Error != nil {
+	} else if result != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": "Something bad happened"})
 		return
 	}
 
-	userResponse := &models.UserResponse{
+	userResponse := &dto.UserResponse{
 		ID:        newUser.ID,
 		Name:      newUser.Name,
 		Email:     newUser.Email,
@@ -91,22 +94,21 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 //	@Summary		SignInUser
 //	@Description	SignInUser
 //	@Tags			auth
-//	@Param			payload	body		models.SignInInput	true	"Login payload"
+//	@Param			payload	body		dto.SignInInput	true	"Login payload"
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{object}	string
 //	@Router			/auth/login [post]
 func (ac *AuthController) SignInUser(ctx *gin.Context) {
-	var payload *models.SignInInput
+	var payload *dto.SignInInput
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	var user models.User
-	result := ac.DB.First(&user, "email = ?", strings.ToLower(payload.Email))
-	if result.Error != nil {
+	user, error := ac.service.FindUserByEmail(payload.Email)
+	if error != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid email or Password"})
 		return
 	}
@@ -167,6 +169,7 @@ func (ac *AuthController) RefreshAccessToken(ctx *gin.Context) {
 
 	var user models.User
 	result := ac.DB.First(&user, "id = ?", fmt.Sprint(sub))
+
 	if result.Error != nil {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user belonging to this token no logger exists"})
 		return

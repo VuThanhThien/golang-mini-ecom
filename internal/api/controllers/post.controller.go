@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/VuThanhThien/golang-gorm-postgres/models"
+	"github.com/VuThanhThien/golang-gorm-postgres/internal/models"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
