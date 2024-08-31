@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/VuThanhThien/golang-gorm-postgres/internal/api/repositories"
@@ -11,6 +12,7 @@ import (
 type AuthServiceInterface interface {
 	SignUpUser(order *models.User) error
 	FindUserByEmail(email string) (*models.User, error)
+	FindUserById(email interface{}) (*models.User, error)
 }
 
 type AuthService struct {
@@ -40,6 +42,13 @@ func (s *AuthService) FindUserByEmail(email string) (*models.User, error) {
 	var user models.User
 
 	err := s.repo.GetDB().First(&user, "email = ?", strings.ToLower(email)).Error
+
+	return &user, err
+}
+
+func (s *AuthService) FindUserById(sub interface{}) (*models.User, error) {
+	var user models.User
+	err := s.repo.GetDB().First(&user, "id = ?", fmt.Sprint(sub)).Error
 
 	return &user, err
 }

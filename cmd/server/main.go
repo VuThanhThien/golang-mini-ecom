@@ -1,8 +1,16 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"golang.org/x/net/context"
+	"io"
 	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	_ "github.com/VuThanhThien/golang-gorm-postgres/docs"
 	"github.com/VuThanhThien/golang-gorm-postgres/internal/initializers"
@@ -14,6 +22,8 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
+const OperationIDKey = "X-Request-Id"
 
 var (
 	server *gin.Engine
@@ -30,24 +40,30 @@ func init() {
 	if err := initializers.Migrate(); err != nil {
 		log.Fatal("Failed to run database migrations", err)
 	}
-	fmt.Println("👍 Migration complete")
 
 	server = gin.Default()
 }
 
-// RequestIDMiddleware ...
-// Generate a unique ID and attach it to each request for future reference or use
 func RequestIDMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		uuid := uuid.New()
-		c.Writer.Header().Set("X-Request-Id", uuid.String())
+		id := uuid.New()
+		c.Set(OperationIDKey, id.String())
 		c.Next()
+	}
+}
+
+func LoggingMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		start := time.Now()
+		c.Next()
+		operationID, _ := c.Get(OperationIDKey)
+		log.Printf("[%v] [%s] %q %v\n", operationID, c.Request.Method, c.Request.RequestURI, time.Since(start))
 	}
 }
 
 //	@title			Swagger Example API
 //	@version		1.0
-//	@description	This is a sample server celler server.
+//	@description	This is a sample server golang server.
 //	@termsOfService	http://swagger.io/terms/
 //	@contact.name	API Support
 //	@contact.url	http://www.swagger.io/support
@@ -69,12 +85,44 @@ func main() {
 	}
 
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"http://localhost:8000", config.ClientOrigin}
+	corsConfig.AllowOrigins = []string{"http://localhost:" + config.ServerPort, config.ClientOrigin}
 	corsConfig.AllowCredentials = true
+
+	// To implement a graceful shutdown while using Gin, you should create an http.Server
+	// instance yourself and avoid using server.Run()
+	srv := &http.Server{
+		Addr:    ":" + config.ServerPort,
+		Handler: server.Handler(),
+	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("Listen: %s\n", err)
+		}
+	}()
 
 	server.Use(cors.New(corsConfig))
 	server.Use(RequestIDMiddleware())
+	server.Use(LoggingMiddleware())
 	server.Use(gzip.Gzip(gzip.DefaultCompression))
+
+	// add timestamp to name to avoid overwrite this log
+	f, _ := os.Create("tmp/gin.log")
+	gin.DefaultWriter = io.MultiWriter(f)
+	server.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
+		// your custom format
+		return fmt.Sprintf("%s - [%s] \"%s %s %s %d %s \"%s\" %s\"\n",
+			param.ClientIP,
+			param.TimeStamp.Format(time.RFC1123),
+			param.Method,
+			param.Path,
+			param.Request.Proto,
+			param.StatusCode,
+			param.Latency,
+			param.Request.UserAgent(),
+			param.ErrorMessage,
+		)
+	}))
 
 	server.LoadHTMLGlob("./public/html/*")
 	server.Static("/public", "./public")
@@ -86,5 +134,17 @@ func main() {
 	routes.SetupRoutes(server, initializers.DB)
 	fmt.Printf("🚀 ~running on: http://localhost:%s/swagger/index.html 🚀 \n", config.ServerPort)
 
-	log.Fatal(server.Run(":" + config.ServerPort))
+	// Wait for interrupt signal to gracefully shut down the server with
+	// a timeout of 5 seconds.
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("Server forced to shutdown:", err)
+	}
+
 }

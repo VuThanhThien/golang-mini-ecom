@@ -13,7 +13,8 @@ import (
 
 func SetupRoutes(server *gin.Engine, db *gorm.DB) {
 	router := server.Group("/api")
-	router.GET("/healthchecker", func(ctx *gin.Context) {
+
+	router.GET("/healthcheck", func(ctx *gin.Context) {
 		message := "Welcome to Golang with Gorm and Postgres"
 		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
 	})
@@ -37,8 +38,12 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB) {
 	postRoutes.GET("/:postId", postController.FindPostById)
 	postRoutes.DELETE("/:postId", postController.DeletePost)
 
-	userController := controllers.NewUserController(db)
+	userRepo := repositories.NewUserRepository(db)
+	userService := services.NewUserService(userRepo)
+	userController := controllers.NewUserController(db, userService)
+
 	userRoutes := router.Group("users")
+	userRoutes.GET("/list", middleware.DeserializeUser(), userController.ListUsers)
 	userRoutes.GET("/me", middleware.DeserializeUser(), userController.GetMe)
 
 }

@@ -31,6 +31,14 @@ type UserResponse struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type ListUserDto struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Role     string `json:"role"`
+	Provider string `json:"provider"`
+}
+
 type UserListResponse struct {
 	Orders []UserResponse `json:"users"`
 	Total  int            `json:"total"`

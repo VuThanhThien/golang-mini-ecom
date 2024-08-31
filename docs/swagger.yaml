@@ -19,7 +19,22 @@ definitions:
     - image
     - title
     type: object
-  github_com_VuThanhThien_golang-gorm-postgres_internal_models.SignInInput:
+  github_com_VuThanhThien_golang-gorm-postgres_internal_models.UpdatePost:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      image:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      user:
+        type: string
+    type: object
+  github_com_VuThanhThien_golang-gorm-postgres_internal_models_dto.SignInInput:
     properties:
       email:
         example: admin@gmail.com
@@ -31,7 +46,7 @@ definitions:
     - email
     - password
     type: object
-  github_com_VuThanhThien_golang-gorm-postgres_internal_models.SignUpInput:
+  github_com_VuThanhThien_golang-gorm-postgres_internal_models_dto.SignUpInput:
     properties:
       email:
         example: admin@gmail.com
@@ -55,22 +70,16 @@ definitions:
     - passwordConfirm
     - photo
     type: object
-  github_com_VuThanhThien_golang-gorm-postgres_internal_models.UpdatePost:
+  github_com_VuThanhThien_golang-gorm-postgres_internal_models_dto.UserListResponse:
     properties:
-      content:
-        type: string
-      created_at:
-        type: string
-      image:
-        type: string
-      title:
-        type: string
-      updated_at:
-        type: string
-      user:
-        type: string
+      total:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models_dto.UserResponse'
+        type: array
     type: object
-  github_com_VuThanhThien_golang-gorm-postgres_internal_models.UserResponse:
+  github_com_VuThanhThien_golang-gorm-postgres_internal_models_dto.UserResponse:
     properties:
       created_at:
         type: string
@@ -95,7 +104,7 @@ info:
     email: support@swagger.io
     name: API Support
     url: http://www.swagger.io/support
-  description: This is a sample server celler server.
+  description: This is a sample server golang server.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -114,7 +123,7 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models.SignInInput'
+          $ref: '#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models_dto.SignInInput'
       produces:
       - application/json
       responses:
@@ -123,6 +132,21 @@ paths:
           schema:
             type: string
       summary: SignInUser
+      tags:
+      - auth
+  /auth/logout:
+    get:
+      consumes:
+      - application/json
+      description: LogoutUser
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: LogoutUser
       tags:
       - auth
   /auth/refresh:
@@ -151,14 +175,14 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models.SignUpInput'
+          $ref: '#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models_dto.SignUpInput'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models.UserResponse'
+            $ref: '#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models_dto.UserResponse'
       summary: SignUpUser
       tags:
       - auth
@@ -274,6 +298,49 @@ paths:
       summary: UpdatePost
       tags:
       - post
+  /users/list:
+    get:
+      consumes:
+      - application/json
+      description: GetListUsers
+      parameters:
+      - in: query
+        name: email
+        type: string
+      - in: query
+        name: id
+        type: string
+      - in: query
+        name: name
+        type: string
+      - in: query
+        name: provider
+        type: string
+      - in: query
+        name: role
+        type: string
+      - default: 10
+        example: 5
+        in: query
+        name: limit
+        type: integer
+      - default: 1
+        example: 1
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models_dto.UserListResponse'
+      security:
+      - Bearer: []
+      summary: GetListUsers
+      tags:
+      - users
   /users/me:
     get:
       consumes:
@@ -285,7 +352,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models.UserResponse'
+            $ref: '#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models_dto.UserResponse'
       security:
       - Bearer: []
       summary: GetMe

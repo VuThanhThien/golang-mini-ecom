@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/VuThanhThien/golang-gorm-postgres/internal/models"
+	_ "github.com/VuThanhThien/golang-gorm-postgres/internal/models/dto"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -128,11 +129,6 @@ func (pc *PostController) FindPostById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": post})
 }
 
-type FindPostsQuery struct {
-	Page     *int `query:"page"        example:"1"  default:"1"`
-	PageSize *int `query:"limit"   example:"5"  json:"limit" default:"10"`
-}
-
 // FindPosts godoc
 //
 //	@Summary		FindPosts
@@ -140,7 +136,7 @@ type FindPostsQuery struct {
 //	@Tags			post
 //	@Accept			json
 //	@Produce		json
-//	@Param 			_ 	query FindPostsQuery false "FindPostsQuery"
+//	@Param 			_ 	query dto.PaginationDto false "PaginationDto"
 //	@Security		Bearer
 //	@Router			/posts [get]
 func (pc *PostController) FindPosts(ctx *gin.Context) {
