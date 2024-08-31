@@ -1,7 +1,9 @@
-if you have issue with $PATH of zsh, try :
+Install project:
 
-```
-export PATH=$(go env GOPATH)/bin:$PATH
+```go
+sh go_install.sh
+
+make deps
 ```
 
 

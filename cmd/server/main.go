@@ -14,11 +14,11 @@ import (
 
 	_ "github.com/VuThanhThien/golang-gorm-postgres/docs"
 	"github.com/VuThanhThien/golang-gorm-postgres/internal/initializers"
+	"github.com/VuThanhThien/golang-gorm-postgres/internal/middleware"
 	"github.com/VuThanhThien/golang-gorm-postgres/internal/routes"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -44,23 +44,6 @@ func init() {
 	}
 
 	server = gin.Default()
-}
-
-func RequestIDMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := uuid.New()
-		c.Set(OperationIDKey, id.String())
-		c.Next()
-	}
-}
-
-func LoggingMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		start := time.Now()
-		c.Next()
-		operationID, _ := c.Get(OperationIDKey)
-		log.Printf("[%v] [%s] %q %v\n", operationID, c.Request.Method, c.Request.RequestURI, time.Since(start))
-	}
 }
 
 //	@title						Swagger Example API
@@ -104,8 +87,8 @@ func main() {
 	}()
 
 	server.Use(cors.New(corsConfig))
-	server.Use(RequestIDMiddleware())
-	server.Use(LoggingMiddleware())
+	server.Use(middleware.RequestIDMiddleware())
+	server.Use(middleware.LoggingMiddleware())
 	server.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	// add timestamp to name to avoid overwrite this log
