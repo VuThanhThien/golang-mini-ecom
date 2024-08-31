@@ -315,7 +315,7 @@
                         "Bearer": []
                     }
                 ],
-                "description": "GetListUsers",
+                "description": "ListUsers",
                 "consumes": [
                     "application/json"
                 ],
@@ -325,7 +325,7 @@
                 "tags": [
                     "users"
                 ],
-                "summary": "GetListUsers",
+                "summary": "ListUsers",
                 "parameters": [
                     {
                         "type": "string",

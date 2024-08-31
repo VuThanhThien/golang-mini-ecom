@@ -321,7 +321,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "GetListUsers",
+                "description": "ListUsers",
                 "consumes": [
                     "application/json"
                 ],
@@ -331,7 +331,7 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "GetListUsers",
+                "summary": "ListUsers",
                 "parameters": [
                     {
                         "type": "string",

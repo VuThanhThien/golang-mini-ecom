@@ -302,7 +302,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: GetListUsers
+      description: ListUsers
       parameters:
       - in: query
         name: email
@@ -338,7 +338,7 @@ paths:
             $ref: '#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models_dto.UserListResponse'
       security:
       - Bearer: []
-      summary: GetListUsers
+      summary: ListUsers
       tags:
       - users
   /users/me:
