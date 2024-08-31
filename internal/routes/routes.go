@@ -24,26 +24,32 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB) {
 	authController := controllers.NewAuthController(db, authService)
 
 	authRouters := router.Group("/auth")
-	authRouters.POST("/register", authController.SignUpUser)
-	authRouters.POST("/login", authController.SignInUser)
-	authRouters.GET("/refresh", authController.RefreshAccessToken)
-	authRouters.GET("/logout", middleware.DeserializeUser(), authController.LogoutUser)
+	{
+		authRouters.POST("/register", authController.SignUpUser)
+		authRouters.POST("/login", authController.SignInUser)
+		authRouters.GET("/refresh", authController.RefreshAccessToken)
+		authRouters.GET("/logout", middleware.DeserializeUser(), authController.LogoutUser)
+	}
 
 	postController := controllers.NewPostController(db)
 	postRoutes := router.Group("posts")
-	postRoutes.Use(middleware.DeserializeUser())
-	postRoutes.POST("/", postController.CreatePost)
-	postRoutes.GET("/", postController.FindPosts)
-	postRoutes.PUT("/:postId", postController.UpdatePost)
-	postRoutes.GET("/:postId", postController.FindPostById)
-	postRoutes.DELETE("/:postId", postController.DeletePost)
+	{
+		postRoutes.Use(middleware.DeserializeUser())
+		postRoutes.POST("/", postController.CreatePost)
+		postRoutes.GET("/", postController.FindPosts)
+		postRoutes.PUT("/:postId", postController.UpdatePost)
+		postRoutes.GET("/:postId", postController.FindPostById)
+		postRoutes.DELETE("/:postId", postController.DeletePost)
+	}
 
 	userRepo := repositories.NewUserRepository(db)
 	userService := services.NewUserService(userRepo)
 	userController := controllers.NewUserController(db, userService)
 
 	userRoutes := router.Group("users")
-	userRoutes.GET("/list", middleware.DeserializeUser(), userController.ListUsers)
-	userRoutes.GET("/me", middleware.DeserializeUser(), userController.GetMe)
+	{
+		userRoutes.GET("/list", middleware.DeserializeUser(), userController.ListUsers)
+		userRoutes.GET("/me", middleware.DeserializeUser(), userController.GetMe)
+	}
 
 }

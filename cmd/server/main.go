@@ -37,8 +37,10 @@ func init() {
 
 	initializers.ConnectDB(&config)
 	initializers.InitRedis(&config)
-	if err := initializers.Migrate(); err != nil {
-		log.Fatal("Failed to run database migrations", err)
+	if config.EnableAutoMigrate == "true" {
+		if err := initializers.Migrate(); err != nil {
+			log.Fatal("Failed to run database migrations", err)
+		}
 	}
 
 	server = gin.Default()
@@ -61,17 +63,17 @@ func LoggingMiddleware() gin.HandlerFunc {
 	}
 }
 
-//	@title			Swagger Example API
-//	@version		1.0
-//	@description	This is a sample server golang server.
-//	@termsOfService	http://swagger.io/terms/
-//	@contact.name	API Support
-//	@contact.url	http://www.swagger.io/support
-//	@contact.email	support@swagger.io
-//	@license.name	Apache 2.0
-//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
-//	@host			localhost:8000
-//	@BasePath		/api
+//	@title						Swagger Example API
+//	@version					1.0
+//	@description				This is a sample server golang server.
+//	@termsOfService				http://swagger.io/terms/
+//	@contact.name				API Support
+//	@contact.url				http://www.swagger.io/support
+//	@contact.email				support@swagger.io
+//	@license.name				Apache 2.0
+//	@license.url				http://www.apache.org/licenses/LICENSE-2.0.html
+//	@host						localhost:8000
+//	@BasePath					/api
 //	@securityDefinitions.basic	BasicAuth
 //	@securityDefinitions.apikey	Bearer
 //	@in							header
@@ -88,7 +90,7 @@ func main() {
 	corsConfig.AllowOrigins = []string{"http://localhost:" + config.ServerPort, config.ClientOrigin}
 	corsConfig.AllowCredentials = true
 
-	// To implement a graceful shutdown while using Gin, you should create an http.Server
+	// To implement a graceful shutdown while using Gin, you should create a http.Server
 	// instance yourself and avoid using server.Run()
 	srv := &http.Server{
 		Addr:    ":" + config.ServerPort,
@@ -110,7 +112,6 @@ func main() {
 	f, _ := os.Create("tmp/gin.log")
 	gin.DefaultWriter = io.MultiWriter(f)
 	server.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
-		// your custom format
 		return fmt.Sprintf("[%s] %s - [%s] \"%s: %s %s %d\" %s %s\n",
 			param.TimeStamp.Format(time.DateTime),
 			param.ClientIP,

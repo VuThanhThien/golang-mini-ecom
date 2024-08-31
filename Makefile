@@ -7,13 +7,18 @@ GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 GOMOD=$(GOCMD) mod
 GOLINT=golangci-lint
-DATABASE_URL := "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?timezone=${DB_TIMEZONE}"
+DATABASE_URL := "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=${SSL_MODE}&timezone=${DB_TIMEZONE}"
 
 # Main package path
 MAIN_PATH=./cmd/server
+MIGRATIONS_PATH=internal/initializers/migrations
+step = 1
 
 # Binary name
 BINARY_NAME=ecombase
+
+install:
+	sh go_install.sh
 
 # Build the project
 build:
@@ -78,4 +83,13 @@ dev:
 docs:
 	swag init -g $(MAIN_PATH)/main.go --parseDependency --parseInternal
 
-.PHONY: migrate dev docs postgres network startdb build run clean test test-coverage deps update-deps build-all lint
+migration-up:
+	migrate -database $(DATABASE_URL) -path $(MIGRATIONS_PATH) up
+
+migration-down:
+	migrate -database $(DATABASE_URL) -path $(MIGRATIONS_PATH) down
+
+migration-new:
+	migrate create -ext sql -dir $(MIGRATIONS_PATH) -seq $(name)
+
+.PHONY: migrate dev docs postgres network startdb build run clean test test-coverage deps update-deps build-all lint install migration-up migration-down
