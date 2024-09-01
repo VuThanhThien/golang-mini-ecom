@@ -9,8 +9,8 @@ import (
 func LoggingMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
-		c.Next()
 		operationID, _ := c.Get(OperationIDKey)
-		log.Printf("[%v] [%s] %q %v\n", operationID, c.Request.Method, c.Request.RequestURI, time.Since(start))
+		log.Printf("[%v] [%s] %q %v", operationID, c.Request.Method, c.Request.RequestURI, time.Since(start))
+		c.Next()
 	}
 }

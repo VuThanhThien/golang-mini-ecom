@@ -23,8 +23,6 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-const OperationIDKey = "X-Request-Id"
-
 var (
 	server *gin.Engine
 )
@@ -86,6 +84,7 @@ func main() {
 		}
 	}()
 
+	server.Use(middleware.Recover())
 	server.Use(cors.New(corsConfig))
 	server.Use(middleware.RequestIDMiddleware())
 	server.Use(middleware.LoggingMiddleware())
@@ -98,7 +97,7 @@ func main() {
 		return fmt.Sprintf("[%s] %s - [%s] \"%s: %s %s %d\" %s %s\n",
 			param.TimeStamp.Format(time.DateTime),
 			param.ClientIP,
-			param.Keys[OperationIDKey],
+			param.Keys[middleware.OperationIDKey],
 			param.Method,
 			param.Path,
 			param.Request.Proto,

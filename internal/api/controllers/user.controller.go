@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/VuThanhThien/golang-gorm-postgres/internal/api/services"
+	"github.com/VuThanhThien/golang-gorm-postgres/internal/middleware"
 	"github.com/VuThanhThien/golang-gorm-postgres/internal/models"
 	"github.com/VuThanhThien/golang-gorm-postgres/internal/models/dto"
 	"github.com/gin-gonic/gin"
@@ -73,10 +74,11 @@ func (uc *UserController) ListUsers(c *gin.Context) {
 //		@Accept			json
 //		@Produce		json
 //		@Success		200	{object}	dto.UserResponse
+//		@Failure 		500 {string} 	string 				"an error occurred during the modification"
 //	 	@Security		Bearer
 //		@Router			/users/me [get]
 func (uc *UserController) GetMe(ctx *gin.Context) {
-	currentUser := ctx.MustGet("currentUser").(models.User)
+	currentUser := ctx.MustGet(middleware.CURRENT_USER).(models.User)
 	userResponse := &dto.UserResponse{
 		ID:        currentUser.ID,
 		Name:      currentUser.Name,

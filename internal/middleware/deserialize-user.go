@@ -11,6 +11,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	CURRENT_USER string = "currentUser"
+)
+
 func DeserializeUser() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var accessToken string
@@ -42,11 +46,11 @@ func DeserializeUser() gin.HandlerFunc {
 		result := initializers.DB.First(&user, "id = ?", fmt.Sprint(sub))
 
 		if result.Error != nil {
-			ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user belonging to this token no longger exists"})
+			ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user belonging to this token no longer exists"})
 			return
 		}
 
-		ctx.Set("currentUser", user)
+		ctx.Set(CURRENT_USER, user)
 		ctx.Next()
 	}
 }

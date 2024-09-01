@@ -1,13 +1,17 @@
 package controllers
 
 import (
+	"github.com/VuThanhThien/golang-gorm-postgres/internal/middleware"
+	"github.com/VuThanhThien/golang-gorm-postgres/internal/models/dto"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
+	_ "github.com/VuThanhThien/golang-gorm-postgres/internal/middleware"
 	"github.com/VuThanhThien/golang-gorm-postgres/internal/models"
 	_ "github.com/VuThanhThien/golang-gorm-postgres/internal/models/dto"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -30,11 +34,11 @@ func NewPostController(DB *gorm.DB) PostController {
 //	@Param			payload	body		models.CreatePostRequest	true	"CreatePost payload"
 //	@Security		Bearer
 //
-// @Success			200	{object}	string
+// @Success			200	dto.PostResponse	string
 // @Router			/posts [post]
 func (pc *PostController) CreatePost(ctx *gin.Context) {
-	currentUser := ctx.MustGet("currentUser").(models.User)
-	var payload *models.CreatePostRequest
+	currentUser := ctx.MustGet(middleware.CURRENT_USER).(models.User)
+	var payload *dto.CreatePostRequest
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		ctx.JSON(http.StatusBadRequest, err.Error())
@@ -46,12 +50,13 @@ func (pc *PostController) CreatePost(ctx *gin.Context) {
 		Title:     payload.Title,
 		Content:   payload.Content,
 		Image:     payload.Image,
-		User:      currentUser.ID,
+		UserID:    currentUser.ID,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
 
 	result := pc.DB.Create(&newPost)
+
 	if result.Error != nil {
 		if strings.Contains(result.Error.Error(), "duplicate key") {
 			ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "Post with that title already exists"})
@@ -61,7 +66,17 @@ func (pc *PostController) CreatePost(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": newPost})
+	postResponse := &dto.PostResponse{
+		ID:        newPost.ID,
+		Title:     newPost.Title,
+		Content:   newPost.Content,
+		Image:     newPost.Image,
+		UserID:    newPost.UserID,
+		CreatedAt: newPost.CreatedAt,
+		UpdatedAt: newPost.UpdatedAt,
+	}
+
+	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": postResponse})
 }
 
 // UpdatePost godoc
@@ -78,9 +93,9 @@ func (pc *PostController) CreatePost(ctx *gin.Context) {
 //	@Router			/posts/:postId [put]
 func (pc *PostController) UpdatePost(ctx *gin.Context) {
 	postId := ctx.Param("postId")
-	currentUser := ctx.MustGet("currentUser").(models.User)
+	currentUser := ctx.MustGet(middleware.CURRENT_USER).(models.User)
 
-	var payload *models.UpdatePost
+	var payload *dto.UpdatePost
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
@@ -96,7 +111,7 @@ func (pc *PostController) UpdatePost(ctx *gin.Context) {
 		Title:     payload.Title,
 		Content:   payload.Content,
 		Image:     payload.Image,
-		User:      currentUser.ID,
+		UserID:    currentUser.ID,
 		CreatedAt: updatedPost.CreatedAt,
 		UpdatedAt: now,
 	}

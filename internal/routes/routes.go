@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/VuThanhThien/golang-gorm-postgres/internal/api/controllers"
@@ -16,6 +17,8 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB) {
 
 	router.GET("/healthcheck", func(ctx *gin.Context) {
 		message := "Welcome to Golang with Gorm and Postgres"
+		a := 0
+		fmt.Printf("test cover middleware", 10/a)
 		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
 	})
 
@@ -48,7 +51,7 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB) {
 
 	userRoutes := router.Group("users")
 	{
-		userRoutes.GET("/list", middleware.DeserializeUser(), userController.ListUsers)
+		userRoutes.GET("/list", middleware.DeserializeUser(), middleware.RequireRole(middleware.ADMIN), userController.ListUsers)
 		userRoutes.GET("/me", middleware.DeserializeUser(), userController.GetMe)
 	}
 

@@ -407,6 +407,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/github_com_VuThanhThien_golang-gorm-postgres_internal_models_dto.UserResponse"
                         }
+                    },
+                    "500": {
+                        "description": "an error occurred during the modification",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 }
             }
@@ -424,19 +430,10 @@ const docTemplate = `{
                 "content": {
                     "type": "string"
                 },
-                "created_at": {
-                    "type": "string"
-                },
                 "image": {
                     "type": "string"
                 },
                 "title": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "user": {
                     "type": "string"
                 }
             }
@@ -447,19 +444,10 @@ const docTemplate = `{
                 "content": {
                     "type": "string"
                 },
-                "created_at": {
-                    "type": "string"
-                },
                 "image": {
                     "type": "string"
                 },
                 "title": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "user": {
                     "type": "string"
                 }
             }
