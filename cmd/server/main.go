@@ -84,12 +84,11 @@ func main() {
 		}
 	}()
 
-	server.Use(middleware.Recover())
 	server.Use(cors.New(corsConfig))
 	server.Use(middleware.RequestIDMiddleware())
 	server.Use(middleware.LoggingMiddleware())
 	server.Use(gzip.Gzip(gzip.DefaultCompression))
-
+	server.Use(middleware.RateLimiter())
 	// add timestamp to name to avoid overwrite this log
 	f, _ := os.Create("tmp/gin.log")
 	gin.DefaultWriter = io.MultiWriter(f)
@@ -106,7 +105,7 @@ func main() {
 			param.ErrorMessage,
 		)
 	}))
-
+	server.Use(middleware.Recover())
 	server.LoadHTMLGlob("./public/html/*")
 	server.Static("/public", "./public")
 	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

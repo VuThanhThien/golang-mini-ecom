@@ -13,7 +13,7 @@ func Recover() gin.HandlerFunc {
 				operationID, _ := c.Get(OperationIDKey)
 				log.Error().Msgf("[%v] %v", operationID, err)
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-					"error": "Internal Server Error",
+					"Error": "Internal Server Error",
 				})
 				return
 			}
