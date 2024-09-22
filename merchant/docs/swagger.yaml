@@ -1,0 +1,98 @@
+basePath: /api
+definitions:
+  github_com_VuThanhThien_golang-gorm-postgres_merchant_internal_models_dto.CreateMerchantDTO:
+    properties:
+      description:
+        type: string
+      merchant_id:
+        type: string
+      name:
+        type: string
+    required:
+    - merchant_id
+    - name
+    type: object
+host: localhost:8001
+info:
+  contact: {}
+  description: This is merchant golang server.
+  title: Swagger Merchant API
+  version: "1.0"
+paths:
+  /merchants:
+    post:
+      consumes:
+      - application/json
+      description: CreateMerchant
+      parameters:
+      - description: merchant
+        in: body
+        name: merchant
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_VuThanhThien_golang-gorm-postgres_merchant_internal_models_dto.CreateMerchantDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: CreateMerchant
+      tags:
+      - merchants
+  /merchants/{id}:
+    get:
+      consumes:
+      - application/json
+      description: GetMerchant
+      parameters:
+      - description: id
+        in: path
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: GetMerchant
+      tags:
+      - merchants
+  /merchants/merchant-id/{merchantID}:
+    get:
+      consumes:
+      - application/json
+      description: GetMerchantByMerchantID
+      parameters:
+      - description: merchantID
+        in: path
+        name: merchantID
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: GetMerchantByMerchantID
+      tags:
+      - merchants
+securityDefinitions:
+  BasicAuth:
+    type: basic
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
