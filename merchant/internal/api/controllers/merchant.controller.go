@@ -4,18 +4,18 @@ import (
 	"net/http"
 
 	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/api/services"
+	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/middleware"
 	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/models/dto"
+	"github.com/VuThanhThien/golang-gorm-postgres/merchant/pkg/pb"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type MerchantController struct {
-	DB      *gorm.DB
-	service services.MerchantServiceInterface
+	service services.IMerchantService
 }
 
-func NewMerchantController(DB *gorm.DB, service services.MerchantServiceInterface) MerchantController {
-	return MerchantController{DB, service}
+func NewMerchantController(service services.IMerchantService) MerchantController {
+	return MerchantController{service: service}
 }
 
 //		GetMerchant godoc
@@ -75,15 +75,22 @@ func (uc *MerchantController) GetMerchantByMerchantID(c *gin.Context) {
 //		@Router			/merchants [post]
 //		@Success		200	{object}		object
 func (uc *MerchantController) CreateMerchant(c *gin.Context) {
-	var dto dto.CreateMerchantDTO
-	if err := c.ShouldBindJSON(&dto); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	value, oke := c.Get(middleware.CURRENT_USER)
+	if !oke {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "You are not logged in"})
+		return
+	}
+	user := value.(*pb.User)
+	var createMerchantDTO dto.CreateMerchantDTO
+	createMerchantDTO.UserId = uint(user.Id)
+	if err := c.ShouldBindJSON(&createMerchantDTO); err != nil {
+		c.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	merchant, err := uc.service.CreateMerchantWithTx(&dto)
+	merchant, err := uc.service.CreateMerchantWithTx(&createMerchantDTO)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 

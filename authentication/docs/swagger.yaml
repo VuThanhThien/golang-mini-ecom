@@ -52,7 +52,7 @@ definitions:
       email:
         type: string
       id:
-        type: string
+        type: integer
       name:
         type: string
       photo:
@@ -68,14 +68,11 @@ host: localhost:8000
 info:
   contact:
     email: support@swagger.io
-    name: API Support
-    url: http://www.swagger.io/support
-  description: This is a sample server golang server.
+  description: This is authentication golang server.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: http://swagger.io/terms/
-  title: Swagger Example API
+  title: Swagger Authentication API
   version: "1.0"
 paths:
   /auth/login:
@@ -152,6 +149,33 @@ paths:
       summary: SignUpUser
       tags:
       - auth
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: GetUser
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_VuThanhThien_golang-gorm-postgres_authentication_internal_models_dto.UserResponse'
+        "500":
+          description: an error occurred during the modification
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: GetUser
+      tags:
+      - users
   /users/list:
     get:
       consumes:
@@ -160,9 +184,6 @@ paths:
       parameters:
       - in: query
         name: email
-        type: string
-      - in: query
-        name: id
         type: string
       - in: query
         name: name

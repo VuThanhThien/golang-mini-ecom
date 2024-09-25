@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/VuThanhThien/golang-gorm-postgres/authentication/pkg/pb";
+
+message User {
+  uint64 id = 1;
+  string username = 2;
+  string email = 3;
+  string full_name = 4;
+  string photo = 5;
+  string provider = 6;
+  string role = 7;
+  string created_at = 8;
+  string updated_at = 9;
+  bool verified = 10;
+}
+
+message ReadUserRequest {
+  uint64 id = 1;
+}
+
+service UserGrpc {
+  rpc ReadUser(ReadUserRequest) returns (User) {
+    option (google.api.http) = {
+        get: "/api/users/{id}"
+      };
+  }
+}

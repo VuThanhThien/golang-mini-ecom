@@ -9,10 +9,7 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "http://swagger.io/terms/",
         "contact": {
-            "name": "API Support",
-            "url": "http://www.swagger.io/support",
             "email": "support@swagger.io"
         },
         "license": {
@@ -164,11 +161,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "name": "id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
                         "name": "name",
                         "in": "query"
                     },
@@ -225,6 +217,49 @@ const docTemplate = `{
                     "users"
                 ],
                 "summary": "GetMe",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_VuThanhThien_golang-gorm-postgres_authentication_internal_models_dto.UserResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "an error occurred during the modification",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "GetUser",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "GetUser",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -316,7 +351,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"
@@ -355,8 +390,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8000",
 	BasePath:         "/api",
 	Schemes:          []string{},
-	Title:            "Swagger Example API",
-	Description:      "This is a sample server golang server.",
+	Title:            "Swagger Authentication API",
+	Description:      "This is authentication golang server.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

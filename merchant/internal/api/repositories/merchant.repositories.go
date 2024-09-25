@@ -36,3 +36,7 @@ func (r *MerchantRepository) GetByMerchantID(merchantID string) (*models.Merchan
 func (r *MerchantRepository) CreateWithTx(tx *gorm.DB, merchant *models.Merchant) error {
 	return tx.Session(&gorm.Session{FullSaveAssociations: true}).Create(merchant).Error
 }
+
+func (r *MerchantRepository) UpdateWithTx(tx *gorm.DB, merchant *models.Merchant) error {
+	return tx.Model(merchant).Updates(merchant).Error
+}

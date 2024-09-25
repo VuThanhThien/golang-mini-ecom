@@ -93,4 +93,11 @@ migration-down:
 migration-new:
 	migrate create -ext sql -dir $(MIGRATIONS_PATH) -seq $(name)
 
-.PHONY: migrate dev docs postgres network startdb build run clean test test-coverage deps update-deps build-all lint install migration-up migration-down
+proto: 
+	rm -f pkg/pb/*.go
+	protoc --proto_path=proto --go_out=pkg/pb --go_opt=paths=source_relative \
+    --go-grpc_out=pkg/pb --go-grpc_opt=paths=source_relative \
+	--grpc-gateway_out=pkg/pb --grpc-gateway_opt=paths=source_relative \
+    proto/*.proto
+
+.PHONY: migrate dev docs postgres network startdb build run clean test test-coverage deps update-deps build-all lint install migration-up migration-down proto

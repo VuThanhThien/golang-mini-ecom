@@ -1,0 +1,40 @@
+package dto
+
+import "github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/models"
+
+// FilterOptions represents the options for filtering products
+type FilterOptions struct {
+	Name       string
+	CategoryId string
+	MinPrice   float64
+	MaxPrice   float64
+}
+
+// PaginationResult represents the result of a paginated query
+type PaginationResult struct {
+	Data       []models.Product
+	TotalItems int64
+	TotalPages int
+	Page       int
+	PageSize   int
+}
+
+// CreateProductDTO represents the data transfer object for creating a product
+type CreateProductDTO struct {
+	Name        string  `json:"name" binding:"required"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price" binding:"required"`
+	SKU         string  `json:"sku" binding:"required"`
+	CategoryID  uint    `json:"category_id"`
+	MerchantID  uint    `json:"merchant_id"`
+}
+
+// UpdateProductDTO represents the data transfer object for updating a product
+type UpdateProductDTO struct {
+	Name        string  `json:"name" binding:"required"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price" binding:"required"`
+	SKU         string  `json:"sku" binding:"required"`
+	CategoryID  uint    `json:"category_id"`
+	MerchantID  uint    `json:"merchant_id"`
+}

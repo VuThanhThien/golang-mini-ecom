@@ -1,25 +1,35 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"golang.org/x/net/context"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+	"gorm.io/gorm"
 
 	_ "github.com/VuThanhThien/golang-gorm-postgres/authentication/docs"
+	"github.com/VuThanhThien/golang-gorm-postgres/authentication/internal/api/repositories"
+	"github.com/VuThanhThien/golang-gorm-postgres/authentication/internal/api/services"
+	"github.com/VuThanhThien/golang-gorm-postgres/authentication/internal/grpc_handler"
 	"github.com/VuThanhThien/golang-gorm-postgres/authentication/internal/initializers"
 	"github.com/VuThanhThien/golang-gorm-postgres/authentication/internal/middleware"
 	"github.com/VuThanhThien/golang-gorm-postgres/authentication/internal/routes"
+	"github.com/VuThanhThien/golang-gorm-postgres/authentication/pkg/logger"
+	"github.com/VuThanhThien/golang-gorm-postgres/authentication/pkg/pb"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -45,27 +55,35 @@ func init() {
 	server = gin.Default()
 }
 
-//	@title						Swagger Authentication API
-//	@version					1.0
-//	@description				This is authentication golang server.
-//	@host						localhost:8000
-//	@contact.email				support@swagger.io
-//	@license.name				Apache 2.0
-//	@license.url				http://www.apache.org/licenses/LICENSE-2.0.html
-//	@host						localhost:8000
-//	@BasePath					/api
-//	@securityDefinitions.basic	BasicAuth
-//	@securityDefinitions.apikey	Bearer
-//	@in							header
-//	@name						Authorization
-//	@description				Type "Bearer" followed by a space and JWT token.
-
+// @title						Swagger Authentication API
+// @version					1.0
+// @description				This is authentication golang server.
+// @host						localhost:8000
+// @contact.email				support@swagger.io
+// @license.name				Apache 2.0
+// @license.url				http://www.apache.org/licenses/LICENSE-2.0.html
+// @host						localhost:8000
+// @BasePath					/api
+// @securityDefinitions.basic	BasicAuth
+// @securityDefinitions.apikey	Bearer
+// @in							header
+// @name						Authorization
+// @description				Type "Bearer" followed by a space and JWT token.
 func main() {
+	log := logger.NewLogger()
+
 	config, err := initializers.LoadConfig(".")
 	if err != nil {
-		log.Fatal("🚀 Could not load environment variables", err)
+		log.Fatal().Err(err).Msg("🚀 Could not load environment variables")
 	}
 
+	go runGrpcServer(config, initializers.DB, log)
+
+	runGinServer(config, log)
+
+}
+
+func runGinServer(config initializers.Config, log zerolog.Logger) {
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = []string{"http://localhost:" + config.ServerPort, config.ClientOrigin}
 	corsConfig.AllowCredentials = true
@@ -79,7 +97,7 @@ func main() {
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("Listen: %s\n", err)
+			log.Error().Err(err).Msg("Listen")
 		}
 	}()
 
@@ -113,6 +131,7 @@ func main() {
 	})
 
 	routes.SetupRoutes(server, initializers.DB)
+
 	fmt.Printf("🚀 ~running on: http://localhost:%s/swagger/index.html 🚀 \n", config.ServerPort)
 
 	// Wait for interrupt signal to gracefully shut down the server with
@@ -125,7 +144,29 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("Server forced to shutdown:", err)
+		log.Error().Err(err).Msg("Server forced to shutdown")
 	}
 
+}
+
+func runGrpcServer(cfg initializers.Config, db *gorm.DB, log zerolog.Logger) {
+	userRepo := repositories.NewUserRepository(db)
+	userService := services.NewUserService(userRepo)
+	server := grpc_handler.NewServer(userService)
+
+	grpcServer := grpc.NewServer()
+	pb.RegisterUserGrpcServer(grpcServer, server)
+	reflection.Register(grpcServer)
+
+	grpcServerAddress := fmt.Sprintf("%s:%s", cfg.UserGrpcServerHost, cfg.UserGrpcServerPort)
+	listener, err := net.Listen("tcp", grpcServerAddress)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Cannot listen grpc server")
+	}
+
+	log.Printf("start gRPC server at %s", listener.Addr().String())
+	err = grpcServer.Serve(listener)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Cannot start grpc server")
+	}
 }

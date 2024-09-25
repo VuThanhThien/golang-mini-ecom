@@ -72,3 +72,12 @@ func (r *UserRepository) List(dto dto.ListUserDto, pagination dto.PaginationDto)
 
 	return users, int(total), nil
 }
+
+func (r *UserRepository) Read(id uint) (*models.User, error) {
+	var user *models.User
+	err := r.db.First(&user, id).Error
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
