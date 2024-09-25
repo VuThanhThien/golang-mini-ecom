@@ -309,7 +309,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "merchants"
+                    "Merchants"
                 ],
                 "summary": "CreateMerchant",
                 "parameters": [
@@ -319,7 +319,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_VuThanhThien_golang-gorm-postgres_merchant_internal_models_dto.CreateMerchantDTO"
+                            "$ref": "#/definitions/github_com_VuThanhThien_golang-gorm-postgres_merchant_internal_models_dto.CreateMerchantInput"
                         }
                     }
                 ],
@@ -508,6 +508,68 @@ const docTemplate = `{
             }
         },
         "/products": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "FilterProductsWithPagination",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Products"
+                ],
+                "summary": "FilterProductsWithPagination",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "category_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "name": "max_price",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "name": "min_price",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "example": 5,
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "example": 1,
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -522,7 +584,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "products"
+                    "Products"
                 ],
                 "summary": "CreateProduct",
                 "parameters": [
@@ -546,7 +608,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/products/product-id/{product_id}": {
+        "/products/{id}": {
             "get": {
                 "security": [
                     {
@@ -561,14 +623,14 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "products"
+                    "Products"
                 ],
                 "summary": "GetProductByProductID",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "product_id",
-                        "name": "product_id",
+                        "description": "id",
+                        "name": "id",
                         "in": "path"
                     }
                 ],
@@ -580,9 +642,7 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/products/{id}": {
+            },
             "delete": {
                 "security": [
                     {
@@ -597,7 +657,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "products"
+                    "Products"
                 ],
                 "summary": "DeleteProduct",
                 "parameters": [
@@ -652,36 +712,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/variants/{id}": {
-            "delete": {
-                "description": "Delete a variant by its ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Variants"
-                ],
-                "summary": "Delete a variant by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Variant ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/variants/{productID}": {
+        "/variants/product-id/{id}": {
             "get": {
                 "description": "Get a variant by its product ID",
                 "consumes": [
@@ -698,7 +729,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Product ID",
-                        "name": "productID",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -713,7 +744,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/variants/{variantName}": {
+        "/variants/variant-name/{variantName}": {
             "get": {
                 "description": "Get a variant by its variant name",
                 "consumes": [
@@ -744,6 +775,65 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/variants/{id}": {
+            "get": {
+                "description": "Get a variant by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Variants"
+                ],
+                "summary": "Get a variant by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Variant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_VuThanhThien_golang-gorm-postgres_merchant_internal_models_dto.VariantDTO"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a variant by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Variants"
+                ],
+                "summary": "Delete a variant by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Variant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -755,9 +845,6 @@ const docTemplate = `{
             "properties": {
                 "description": {
                     "type": "string"
-                },
-                "id": {
-                    "type": "integer"
                 },
                 "name": {
                     "type": "string"
@@ -798,12 +885,11 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_VuThanhThien_golang-gorm-postgres_merchant_internal_models_dto.CreateMerchantDTO": {
+        "github_com_VuThanhThien_golang-gorm-postgres_merchant_internal_models_dto.CreateMerchantInput": {
             "type": "object",
             "required": [
                 "merchant_id",
-                "name",
-                "user_id"
+                "name"
             ],
             "properties": {
                 "description": {
@@ -814,9 +900,6 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
-                },
-                "user_id": {
-                    "type": "integer"
                 }
             }
         },

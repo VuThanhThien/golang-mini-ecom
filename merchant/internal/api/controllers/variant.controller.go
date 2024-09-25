@@ -35,32 +35,58 @@ func (vc *VariantController) CreateVariant(ctx *gin.Context) {
 
 	createdVariant, err := vc.variantService.Create(variant)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
 	ctx.JSON(http.StatusCreated, createdVariant)
 }
 
+// GetVariantById godoc
+// @Summary Get a variant by ID
+// @Description Get a variant by its ID
+// @Tags Variants
+// @Accept json
+// @Produce json
+// @Param id path string true "Variant ID"
+// @Success 200 {object} dto.VariantDTO
+// @Router /variants/{id} [get]
+func (vc *VariantController) GetVariantById(ctx *gin.Context) {
+	var readIdRequest dto.ReadIdRequest
+	if err := ctx.ShouldBindUri(&readIdRequest); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	variant, err := vc.variantService.GetById(uint(readIdRequest.ID))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, variant)
+}
+
+// GetVariantByProductID godoc
 // GetVariantByProductID godoc
 // @Summary Get a variant by product ID
 // @Description Get a variant by its product ID
 // @Tags Variants
 // @Accept json
 // @Produce json
-// @Param productID path string true "Product ID"
+// @Param id path string true "Product ID"
 // @Success 200 {object} dto.VariantDTO
-// @Router /variants/{productID} [get]
+// @Router /variants/product-id/{id} [get]
 func (vc *VariantController) GetVariantByProductID(ctx *gin.Context) {
-	productID, err := strconv.ParseUint(ctx.Param("productID"), 10, 64)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
+	var readIdRequest dto.ReadIdRequest
+	if err := ctx.ShouldBindUri(&readIdRequest); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	variant, err := vc.variantService.GetByProductID(uint(productID))
+	variant, err := vc.variantService.GetByProductID(uint(readIdRequest.ID))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
@@ -75,12 +101,17 @@ func (vc *VariantController) GetVariantByProductID(ctx *gin.Context) {
 // @Produce json
 // @Param variantName path string true "Variant Name"
 // @Success 200 {object} dto.VariantDTO
-// @Router /variants/{variantName} [get]
+// @Router /variants/variant-name/{variantName} [get]
 func (vc *VariantController) GetVariantByVariantName(ctx *gin.Context) {
-	variantName := ctx.Param("variantName")
-	variant, err := vc.variantService.GetByVariantName(variantName)
+	var readVariantRequest dto.ReadVariantRequest
+	if err := ctx.ShouldBindUri(&readVariantRequest); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	variant, err := vc.variantService.GetByVariantName(readVariantRequest.VariantName)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
@@ -99,13 +130,13 @@ func (vc *VariantController) GetVariantByVariantName(ctx *gin.Context) {
 func (vc *VariantController) DeleteVariant(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid variant ID"})
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
 	err = vc.variantService.Delete(uint(id))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 

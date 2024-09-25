@@ -13,7 +13,7 @@ import (
 type ICategoryService interface {
 	GetCategoryByID(id uint) (*models.Category, error)
 	GetCategoryByCategoryID(categoryID uint) (*models.Category, error)
-	CreateCategory(categoryDTO *dto.CategoryDTO) (*dto.CategoryDTO, error)
+	CreateCategory(categoryDTO *dto.CategoryDTO) (*models.Category, error)
 	DeleteCategory(id uint) error
 	ListCategory(dto dto.ListCategoryDto, pagination dto.PaginationDto) ([]models.Category, int, error)
 }
@@ -34,7 +34,7 @@ func (s *CategoryService) GetCategoryByID(id uint) (*models.Category, error) {
 	return s.categoryRepository.GetByID(id)
 }
 
-func (s *CategoryService) CreateCategory(categoryDTO *dto.CategoryDTO) (*dto.CategoryDTO, error) {
+func (s *CategoryService) CreateCategory(categoryDTO *dto.CategoryDTO) (*models.Category, error) {
 	category := &models.Category{
 		Name:        categoryDTO.Name,
 		Description: categoryDTO.Description,
@@ -57,15 +57,7 @@ func (s *CategoryService) CreateCategory(categoryDTO *dto.CategoryDTO) (*dto.Cat
 		return nil, err
 	}
 
-	// Convert the created category back to DTO
-	createdCategoryDTO := &dto.CategoryDTO{
-		ID:          category.ID,
-		Name:        category.Name,
-		Description: category.Description,
-		ParentID:    &category.ParentID,
-	}
-
-	return createdCategoryDTO, nil
+	return category, nil
 }
 
 func (s *CategoryService) DeleteCategory(id uint) error {

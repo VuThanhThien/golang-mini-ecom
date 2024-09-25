@@ -56,19 +56,15 @@ func init() {
 }
 
 // @title						Swagger Authentication API
-// @version					1.0
-// @description				This is authentication golang server.
-// @host						localhost:8000
-// @contact.email				support@swagger.io
-// @license.name				Apache 2.0
-// @license.url				http://www.apache.org/licenses/LICENSE-2.0.html
+// @version						1.0
+// @description					This is authentication golang server.
 // @host						localhost:8000
 // @BasePath					/api
 // @securityDefinitions.basic	BasicAuth
 // @securityDefinitions.apikey	Bearer
 // @in							header
 // @name						Authorization
-// @description				Type "Bearer" followed by a space and JWT token.
+// @description					Type "Bearer" followed by a space and JWT token.
 func main() {
 	log := logger.NewLogger()
 

@@ -23,6 +23,6 @@ func (r *VariantRepository) GetByProductID(productID uint) (*models.Variant, err
 
 func (r *VariantRepository) GetByVariantName(variantName string) (*models.Variant, error) {
 	var variant models.Variant
-	err := r.GetDB().Where("variant_name = ?", variantName).First(&variant).Error
+	err := r.GetDB().Where("variant_name ILIKE ?", variantName).First(&variant).Error
 	return &variant, err
 }

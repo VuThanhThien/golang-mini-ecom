@@ -11,6 +11,7 @@ type IVariantService interface {
 	GetByProductID(productID uint) (*models.Variant, error)
 	GetByVariantName(variantName string) (*models.Variant, error)
 	Delete(id uint) error
+	GetById(id uint) (*models.Variant, error)
 }
 
 type VariantService struct {
@@ -46,4 +47,8 @@ func (s *VariantService) GetByVariantName(variantName string) (*models.Variant, 
 
 func (s *VariantService) Delete(id uint) error {
 	return s.variantRepository.Delete(id)
+}
+
+func (s *VariantService) GetById(id uint) (*models.Variant, error) {
+	return s.variantRepository.GetByID(id)
 }

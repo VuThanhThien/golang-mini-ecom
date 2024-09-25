@@ -58,6 +58,7 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 
 	productRoutes := router.Group("products")
 	{
+		productRoutes.GET("/", productController.FilterProductsWithPagination)
 		productRoutes.POST("/", middleware.DeserializeUser(userGateway), productController.CreateProduct)
 		productRoutes.GET("/:id", productController.GetProductByID)
 		productRoutes.GET("/product-id/:productID", productController.GetProductByProductID)
@@ -83,7 +84,8 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 	variantRoutes := router.Group("variants")
 	{
 		variantRoutes.POST("/", middleware.DeserializeUser(userGateway), variantController.CreateVariant)
-		variantRoutes.GET("/product-id/:productID", variantController.GetVariantByProductID)
+		variantRoutes.GET("/:id", variantController.GetVariantById)
+		variantRoutes.GET("/product-id/:id", variantController.GetVariantByProductID)
 		variantRoutes.GET("/variant-name/:variantName", variantController.GetVariantByVariantName)
 		variantRoutes.DELETE("/:id", variantController.DeleteVariant)
 	}

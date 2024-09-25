@@ -4,10 +4,10 @@ import "github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/models"
 
 // FilterOptions represents the options for filtering products
 type FilterOptions struct {
-	Name       string
-	CategoryId string
-	MinPrice   float64
-	MaxPrice   float64
+	Name       string  `json:"name"`
+	CategoryId string  `json:"category_id"`
+	MinPrice   float64 `json:"min_price"`
+	MaxPrice   float64 `json:"max_price"`
 }
 
 // PaginationResult represents the result of a paginated query

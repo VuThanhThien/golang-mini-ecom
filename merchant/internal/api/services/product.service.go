@@ -11,6 +11,9 @@ type IProductService interface {
 	GetProductByProductID(productID uint) (*models.Product, error)
 	CreateProduct(dto *dto.CreateProductDTO) (*models.Product, error)
 	DeleteProduct(id uint) error
+	FilterProductsWithPagination(filter dto.FilterOptions, page, pageSize int) (*dto.PaginationResult, error)
+	UpdateStock(id uint, quantity int) error
+	GetAllByCategory(category string) ([]models.Product, error)
 }
 
 type ProductService struct {
@@ -43,4 +46,16 @@ func (s *ProductService) CreateProduct(dto *dto.CreateProductDTO) (*models.Produ
 		MerchantID:  dto.MerchantID,
 	}
 	return s.productRepository.CreateProduct(product)
+}
+
+func (s *ProductService) FilterProductsWithPagination(filter dto.FilterOptions, page, pageSize int) (*dto.PaginationResult, error) {
+	return s.productRepository.FilterProductsWithPagination(filter, page, pageSize)
+}
+
+func (s *ProductService) UpdateStock(id uint, quantity int) error {
+	return s.productRepository.UpdateStock(id, quantity)
+}
+
+func (s *ProductService) GetAllByCategory(category string) ([]models.Product, error) {
+	return s.productRepository.GetAllByCategory(category)
 }

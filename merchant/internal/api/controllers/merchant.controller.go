@@ -67,10 +67,10 @@ func (uc *MerchantController) GetMerchantByMerchantID(c *gin.Context) {
 //
 //		@Summary		CreateMerchant
 //		@Description	CreateMerchant
-//		@Tags			merchants
+//		@Tags			Merchants
 //		@Accept			json
 //		@Produce		json
-//		@Param			merchant	body		dto.CreateMerchantDTO	true	"merchant"
+//		@Param			merchant	body		dto.CreateMerchantInput	true	"merchant"
 //	 	@Security		Bearer
 //		@Router			/merchants [post]
 //		@Success		200	{object}		object

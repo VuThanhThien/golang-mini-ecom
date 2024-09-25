@@ -7,7 +7,6 @@ type ReadIdRequest struct {
 }
 
 type CategoryDTO struct {
-	ID          uint   `json:"id,omitempty"`
 	Name        string `json:"name" binding:"required"`
 	Description string `json:"description"`
 	ParentID    *uint  `json:"parentId,omitempty"`

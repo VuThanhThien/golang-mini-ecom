@@ -4,8 +4,6 @@ definitions:
     properties:
       description:
         type: string
-      id:
-        type: integer
       name:
         type: string
       parentId:
@@ -33,7 +31,7 @@ definitions:
       parent_id:
         type: integer
     type: object
-  github_com_VuThanhThien_golang-gorm-postgres_merchant_internal_models_dto.CreateMerchantDTO:
+  github_com_VuThanhThien_golang-gorm-postgres_merchant_internal_models_dto.CreateMerchantInput:
     properties:
       description:
         type: string
@@ -41,12 +39,9 @@ definitions:
         type: string
       name:
         type: string
-      user_id:
-        type: integer
     required:
     - merchant_id
     - name
-    - user_id
     type: object
   github_com_VuThanhThien_golang-gorm-postgres_merchant_internal_models_dto.CreateProductDTO:
     properties:
@@ -306,7 +301,7 @@ paths:
         name: merchant
         required: true
         schema:
-          $ref: '#/definitions/github_com_VuThanhThien_golang-gorm-postgres_merchant_internal_models_dto.CreateMerchantDTO'
+          $ref: '#/definitions/github_com_VuThanhThien_golang-gorm-postgres_merchant_internal_models_dto.CreateMerchantInput'
       produces:
       - application/json
       responses:
@@ -318,7 +313,7 @@ paths:
       - Bearer: []
       summary: CreateMerchant
       tags:
-      - merchants
+      - Merchants
   /merchants/{id}:
     get:
       consumes:
@@ -431,6 +426,45 @@ paths:
       tags:
       - Product Images
   /products:
+    get:
+      consumes:
+      - application/json
+      description: FilterProductsWithPagination
+      parameters:
+      - in: query
+        name: category_id
+        type: string
+      - in: query
+        name: max_price
+        type: number
+      - in: query
+        name: min_price
+        type: number
+      - in: query
+        name: name
+        type: string
+      - default: 10
+        example: 5
+        in: query
+        name: limit
+        type: integer
+      - default: 1
+        example: 1
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+      security:
+      - Bearer: []
+      summary: FilterProductsWithPagination
+      tags:
+      - Products
     post:
       consumes:
       - application/json
@@ -453,7 +487,7 @@ paths:
       - Bearer: []
       summary: CreateProduct
       tags:
-      - products
+      - Products
   /products/{id}:
     delete:
       consumes:
@@ -475,16 +509,15 @@ paths:
       - Bearer: []
       summary: DeleteProduct
       tags:
-      - products
-  /products/product-id/{product_id}:
+      - Products
     get:
       consumes:
       - application/json
       description: GetProductByProductID
       parameters:
-      - description: product_id
+      - description: id
         in: path
-        name: product_id
+        name: id
         type: string
       produces:
       - application/json
@@ -497,7 +530,7 @@ paths:
       - Bearer: []
       summary: GetProductByProductID
       tags:
-      - products
+      - Products
   /variants:
     post:
       consumes:
@@ -539,7 +572,27 @@ paths:
       summary: Delete a variant by ID
       tags:
       - Variants
-  /variants/{productID}:
+    get:
+      consumes:
+      - application/json
+      description: Get a variant by its ID
+      parameters:
+      - description: Variant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_VuThanhThien_golang-gorm-postgres_merchant_internal_models_dto.VariantDTO'
+      summary: Get a variant by ID
+      tags:
+      - Variants
+  /variants/product-id/{id}:
     get:
       consumes:
       - application/json
@@ -547,7 +600,7 @@ paths:
       parameters:
       - description: Product ID
         in: path
-        name: productID
+        name: id
         required: true
         type: string
       produces:
@@ -560,7 +613,7 @@ paths:
       summary: Get a variant by product ID
       tags:
       - Variants
-  /variants/{variantName}:
+  /variants/variant-name/{variantName}:
     get:
       consumes:
       - application/json

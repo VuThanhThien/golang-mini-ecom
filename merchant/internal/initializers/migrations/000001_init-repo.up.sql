@@ -29,10 +29,13 @@ CREATE TABLE IF NOT EXISTS products (
     description TEXT,
     price DECIMAL(10, 2) NOT NULL,
     category_id BIGINT DEFAULT NULL,
+    merchant_id BIGINT DEFAULT NULL,
+    sku VARCHAR(255) NOT NULL,
     created_at TIMESTAMP,
     updated_at TIMESTAMP,
     deleted_at TIMESTAMP DEFAULT NULL,
-    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
+    FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE SET NULL
 );
 
 -- Create Variants table

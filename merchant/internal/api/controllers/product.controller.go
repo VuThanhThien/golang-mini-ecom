@@ -17,11 +17,55 @@ func NewProductController(service services.IProductService) ProductController {
 	return ProductController{service: service}
 }
 
+// FilterProductsWithPagination godoc
+// @Summary		FilterProductsWithPagination
+// @Description	FilterProductsWithPagination
+// @Tags			Products
+// @Accept			json
+// @Produce		json
+// @Param payload query dto.FilterOptions false "FilterOptions payload"
+// @Param _ query dto.PaginationDto false "PaginationDto"
+// @Security		Bearer
+// @Router			/products [get]
+// @Success		200	{object}		object
+func (c *ProductController) FilterProductsWithPagination(ctx *gin.Context) {
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("pageSize", "10"))
+	var filter dto.FilterOptions
+
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 10
+	}
+
+	if ctx.Query("name") != "" {
+		filter.Name = ctx.Query("name")
+	}
+	if ctx.Query("category_id") != "" {
+		filter.CategoryId = ctx.Query("category_id")
+	}
+	if ctx.Query("min_price") != "" {
+		filter.MinPrice, _ = strconv.ParseFloat(ctx.Query("min_price"), 64)
+	}
+	if ctx.Query("max_price") != "" {
+		filter.MaxPrice, _ = strconv.ParseFloat(ctx.Query("max_price"), 64)
+	}
+
+	products, err := c.service.FilterProductsWithPagination(filter, page, pageSize)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, products)
+}
+
 // GetProductByID godoc
 //
 // @Summary		GetProductByID
 // @Description	GetProductByID
-// @Tags			products
+// @Tags			Products
 // @Accept			json
 // @Produce		json
 // @Param			id		path		string			false	"id"
@@ -44,7 +88,7 @@ func (c *ProductController) GetProductByID(ctx *gin.Context) {
 //
 // @Summary		CreateProduct
 // @Description	CreateProduct
-// @Tags			products
+// @Tags			Products
 // @Accept			json
 // @Produce		json
 // @Param			product	body		dto.CreateProductDTO	true	"product"
@@ -69,7 +113,7 @@ func (c *ProductController) CreateProduct(ctx *gin.Context) {
 //
 // @Summary		DeleteProduct
 // @Description	DeleteProduct
-// @Tags			products
+// @Tags			Products
 // @Accept			json
 // @Produce		json
 // @Param			id		path		string			false	"id"
@@ -93,21 +137,20 @@ func (c *ProductController) DeleteProduct(ctx *gin.Context) {
 //
 // @Summary		GetProductByProductID
 // @Description	GetProductByProductID
-// @Tags			products
+// @Tags			Products
 // @Accept			json
 // @Produce		json
-// @Param			product_id		path		string			false	"product_id"
+// @Param			id		path		string			false	"id"
 // @Security		Bearer
-// @Router			/products/product-id/{product_id} [get]
+// @Router			/products/{id} [get]
 // @Success		200	{object}		object
 func (c *ProductController) GetProductByProductID(ctx *gin.Context) {
-	productID := ctx.Param("product_id")
-	productIDUint, err := strconv.ParseUint(productID, 10, 64)
-	if err != nil {
+	var readIdRequest dto.ReadIdRequest
+	if err := ctx.ShouldBindUri(&readIdRequest); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	product, err := c.service.GetProductByProductID(uint(productIDUint))
+	product, err := c.service.GetProductByProductID(uint(readIdRequest.ID))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

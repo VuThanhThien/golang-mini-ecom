@@ -42,7 +42,7 @@ func (r *ProductRepository) FilterProductsWithPagination(filter dto.FilterOption
 	var products []models.Product
 	var totalItems int64
 
-	query := r.GetDB().Model(&models.Product{})
+	query := r.GetDB().Model(&models.Product{}).Preload("Variants")
 
 	// Apply filters
 	if filter.Name != "" {
