@@ -1,12 +1,9 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is a sample server golang server.",
-        "title": "Swagger Example API",
-        "termsOfService": "http://swagger.io/terms/",
+        "description": "This is authentication golang server.",
+        "title": "Swagger Authentication API",
         "contact": {
-            "name": "API Support",
-            "url": "http://www.swagger.io/support",
             "email": "support@swagger.io"
         },
         "license": {
@@ -158,11 +155,6 @@
                     },
                     {
                         "type": "string",
-                        "name": "id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
                         "name": "name",
                         "in": "query"
                     },
@@ -219,6 +211,49 @@
                     "users"
                 ],
                 "summary": "GetMe",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_VuThanhThien_golang-gorm-postgres_authentication_internal_models_dto.UserResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "an error occurred during the modification",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "GetUser",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "GetUser",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -310,7 +345,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"

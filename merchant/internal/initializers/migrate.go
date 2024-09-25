@@ -5,6 +5,5 @@ import (
 )
 
 func Migrate() error {
-	DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
 	return DB.AutoMigrate(&models.Merchant{})
 }

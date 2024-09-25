@@ -39,6 +39,7 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB) {
 	{
 		userRoutes.GET("/list", middleware.DeserializeUser(), middleware.RequireRole(middleware.ADMIN), userController.ListUsers)
 		userRoutes.GET("/me", middleware.DeserializeUser(), userController.GetMe)
+		userRoutes.GET("/:id", middleware.DeserializeUser(), middleware.RequireRole(middleware.ADMIN), userController.GetUser)
 	}
 
 }

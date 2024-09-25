@@ -19,8 +19,12 @@ type SignInInput struct {
 	Password string `json:"password"  binding:"required" example:"123456@Abc"`
 }
 
+type ReadUserRequest struct {
+	ID uint `uri:"id" binding:"required,min=1"`
+}
+
 type UserResponse struct {
-	ID        string    `json:"id,omitempty"`
+	ID        uint      `json:"id,omitempty"`
 	Name      string    `json:"name,omitempty"`
 	Email     string    `json:"email,omitempty"`
 	Role      string    `json:"role,omitempty"`
@@ -31,7 +35,6 @@ type UserResponse struct {
 }
 
 type ListUserDto struct {
-	ID       string `json:"id"`
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Role     string `json:"role"`
@@ -60,5 +63,18 @@ func ToUserListResponse(users []models.User) UserListResponse {
 	return UserListResponse{
 		Users: summaries,
 		Total: len(summaries),
+	}
+}
+
+func ToUserResponse(user *models.User) *UserResponse {
+	return &UserResponse{
+		ID:        user.ID,
+		Name:      user.Name,
+		Email:     user.Email,
+		Role:      user.Role,
+		Photo:     user.Photo,
+		Provider:  user.Provider,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
 	}
 }

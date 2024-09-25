@@ -4,41 +4,46 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"golang.org/x/net/context"
+	"context"
 
 	_ "github.com/VuThanhThien/golang-gorm-postgres/merchant/docs"
 	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/initializers"
 	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/middleware"
 	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/routes"
+	"github.com/VuThanhThien/golang-gorm-postgres/merchant/pkg/logger"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
+	"github.com/streadway/amqp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 var (
 	server *gin.Engine
+	RMQ    *amqp.Connection
 )
 
 func init() {
+	log := logger.NewLogger()
 	config, err := initializers.LoadConfig(".")
 	if err != nil {
-		log.Fatal("🚀 Could not load environment variables", err)
+		log.Error().Err(err).Msg("Could not load environment variables")
 	}
 
-	initializers.ConnectDB(&config)
+	RMQ = initializers.ConnectRMQ(&config, context.Background())
 	initializers.InitRedis(&config)
+	initializers.ConnectDB(&config)
 	if config.EnableAutoMigrate == "true" {
 		if err := initializers.Migrate(); err != nil {
-			log.Fatal("Failed to run database migrations", err)
+			log.Error().Err(err).Msg("Failed to run database migrations")
 		}
 	}
 
@@ -57,11 +62,18 @@ func init() {
 //	@description				Type "Bearer" followed by a space and JWT token.
 
 func main() {
+	log := logger.NewLogger()
+
 	config, err := initializers.LoadConfig(".")
 	if err != nil {
-		log.Fatal("🚀 Could not load environment variables", err)
+		log.Error().Err(err).Msg("Could not load environment variables")
 	}
 
+	runGinServer(config, log)
+
+}
+
+func runGinServer(config initializers.Config, log zerolog.Logger) {
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = []string{"http://localhost:" + config.ServerPort, config.ClientOrigin}
 	corsConfig.AllowCredentials = true
@@ -75,7 +87,7 @@ func main() {
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("Listen: %s\n", err)
+			log.Error().Err(err).Msg("Listen")
 		}
 	}()
 
@@ -108,7 +120,8 @@ func main() {
 		c.HTML(404, "404.html", gin.H{})
 	})
 
-	routes.SetupRoutes(server, initializers.DB)
+	routes.SetupRoutes(server, initializers.DB, RMQ, log, &config)
+
 	fmt.Printf("🚀 ~running on: http://localhost:%s/swagger/index.html 🚀 \n", config.ServerPort)
 
 	// Wait for interrupt signal to gracefully shut down the server with
@@ -121,7 +134,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("Server forced to shutdown:", err)
+		log.Error().Err(err).Msg("Server forced to shutdown")
 	}
 
 }

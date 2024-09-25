@@ -1,0 +1,2 @@
+ALTER TABLE merchants
+ADD COLUMN user_id BIGINT NOT NULL;

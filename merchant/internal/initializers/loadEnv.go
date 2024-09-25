@@ -30,6 +30,14 @@ type Config struct {
 
 	RedisHost    string `mapstructure:"REDIS_HOST"`
 	ReisPassword string `mapstructure:"REDIS_PASSWORD"`
+
+	AMQP_SERVER_PORT     string `mapstructure:"AMQP_SERVER_PORT"`
+	AMQP_SERVER_HOST     string `mapstructure:"AMQP_SERVER_HOST"`
+	AMQP_SERVER_USER     string `mapstructure:"AMQP_SERVER_USER"`
+	AMQP_SERVER_PASSWORD string `mapstructure:"AMQP_SERVER_PASSWORD"`
+
+	USER_GRPC_SERVER_PORT string `mapstructure:"USER_GRPC_SERVER_PORT"`
+	USER_GRPC_SERVER_HOST string `mapstructure:"USER_GRPC_SERVER_HOST"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

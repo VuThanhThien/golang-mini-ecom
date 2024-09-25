@@ -48,8 +48,6 @@ func (uc *UserController) ListUsers(c *gin.Context) {
 	}
 	pagination.Page = &page
 	pagination.PageSize = &pageSize
-
-	payload.ID = c.Query("id")
 	payload.Email = c.Query("email")
 	payload.Name = c.Query("name")
 	payload.Role = c.Query("role")
@@ -93,4 +91,32 @@ func (uc *UserController) GetMe(ctx *gin.Context) {
 	fmt.Printf("%v", userResponse)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": userResponse}})
+}
+
+// GetUser godoc
+//
+//		@Summary		GetUser
+//		@Description	GetUser
+//		@Tags			users
+//		@Accept			json
+//		@Produce		json
+//		@Param			id	path		string	true	"User ID"
+//		@Success		200	{object}	dto.UserResponse
+//		@Failure 		500 {string} 	string 				"an error occurred during the modification"
+//	 	@Security		Bearer
+//		@Router			/users/{id} [get]
+func (uc *UserController) GetUser(ctx *gin.Context) {
+	var readUserRequest dto.ReadUserRequest
+	if err := ctx.ShouldBindUri(&readUserRequest); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	user, err := uc.service.ReadUser(uint(readUserRequest.ID))
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, dto.ToUserResponse(user))
 }
