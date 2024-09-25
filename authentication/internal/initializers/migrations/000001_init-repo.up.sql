@@ -8,6 +8,7 @@ CREATE TABLE users (
     provider VARCHAR(255) NOT NULL,
     photo VARCHAR(255),
     verified BOOLEAN NOT NULL DEFAULT true,
+    merchant_id BIGINT DEFAULT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
     deleted_at TIMESTAMP DEFAULT NULL

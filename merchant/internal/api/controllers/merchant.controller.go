@@ -8,16 +8,14 @@ import (
 	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/models/dto"
 	"github.com/VuThanhThien/golang-gorm-postgres/merchant/pkg/pb"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type MerchantController struct {
-	DB      *gorm.DB
 	service services.IMerchantService
 }
 
-func NewMerchantController(DB *gorm.DB, service services.IMerchantService) MerchantController {
-	return MerchantController{DB, service}
+func NewMerchantController(service services.IMerchantService) MerchantController {
+	return MerchantController{service: service}
 }
 
 //		GetMerchant godoc
@@ -83,14 +81,14 @@ func (uc *MerchantController) CreateMerchant(c *gin.Context) {
 		return
 	}
 	user := value.(*pb.User)
-	var dto dto.CreateMerchantDTO
-	dto.UserId = uint(user.Id)
-	if err := c.ShouldBindJSON(&dto); err != nil {
+	var createMerchantDTO dto.CreateMerchantDTO
+	createMerchantDTO.UserId = uint(user.Id)
+	if err := c.ShouldBindJSON(&createMerchantDTO); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	merchant, err := uc.service.CreateMerchantWithTx(&dto)
+	merchant, err := uc.service.CreateMerchantWithTx(&createMerchantDTO)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
