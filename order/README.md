@@ -1,4 +1,4 @@
-# Merchant service
+# Order service
 Install project:
 
 ```go

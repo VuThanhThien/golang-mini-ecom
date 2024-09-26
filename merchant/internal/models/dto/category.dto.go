@@ -2,10 +2,6 @@ package dto
 
 import "github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/models"
 
-type ReadIdRequest struct {
-	ID uint `uri:"id" binding:"required,min=1"`
-}
-
 type CategoryDTO struct {
 	Name        string `json:"name" binding:"required"`
 	Description string `json:"description"`
