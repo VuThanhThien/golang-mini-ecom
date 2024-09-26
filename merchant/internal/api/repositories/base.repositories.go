@@ -35,6 +35,9 @@ func (r *BaseRepositoryImpl[T]) Create(entity *T) error {
 func (r *BaseRepositoryImpl[T]) GetByID(id uint) (*T, error) {
 	var entity T
 	err := r.db.First(&entity, id).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
 	return &entity, err
 }
 

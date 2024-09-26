@@ -40,15 +40,15 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 	merchantRepo := repositories.NewMerchantRepository(db)
 	merchantService := services.NewMerchantService(merchantRepo, createOrderPublisher)
 	merchantController := controllers.NewMerchantController(merchantService)
-
+	router.GET("/healthcheck", func(ctx *gin.Context) {
+		message := "Welcome to Golang with Gorm and Postgres"
+		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
+	})
 	merchantRoutes := router.Group("merchants")
 	{
-		router.GET("/healthcheck", func(ctx *gin.Context) {
-			message := "Welcome to Golang with Gorm and Postgres"
-			ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
-		})
-		merchantRoutes.GET("/:id", merchantController.GetMerchant)
-		merchantRoutes.GET("/merchant-id/:merchantID", merchantController.GetMerchantByMerchantID)
+
+		merchantRoutes.GET("/:id", middleware.DeserializeUser(userGateway), merchantController.GetMerchant)
+		merchantRoutes.GET("/merchant-id/:merchantID", middleware.DeserializeUser(userGateway), merchantController.GetMerchantByMerchantID)
 		merchantRoutes.POST("/", middleware.DeserializeUser(userGateway), merchantController.CreateMerchant)
 	}
 
@@ -58,11 +58,11 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 
 	productRoutes := router.Group("products")
 	{
-		productRoutes.GET("/", productController.FilterProductsWithPagination)
+		productRoutes.GET("/", middleware.DeserializeUser(userGateway), productController.FilterProductsWithPagination)
 		productRoutes.POST("/", middleware.DeserializeUser(userGateway), productController.CreateProduct)
-		productRoutes.GET("/:id", productController.GetProductByID)
-		productRoutes.GET("/product-id/:productID", productController.GetProductByProductID)
-		productRoutes.DELETE("/:id", productController.DeleteProduct)
+		productRoutes.GET("/:id", middleware.DeserializeUser(userGateway), productController.GetProductByID)
+		productRoutes.GET("/product-id/:productID", middleware.DeserializeUser(userGateway), productController.GetProductByProductID)
+		productRoutes.DELETE("/:id", middleware.DeserializeUser(userGateway), productController.DeleteProduct)
 	}
 
 	categoryRepo := repositories.NewCategoryRepository(db)
@@ -71,10 +71,10 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 
 	categoryRoutes := router.Group("categories")
 	{
-		categoryRoutes.GET("/", categoryController.ListCategory)
+		categoryRoutes.GET("/", middleware.DeserializeUser(userGateway), categoryController.ListCategory)
 		categoryRoutes.POST("/", middleware.DeserializeUser(userGateway), categoryController.CreateCategory)
-		categoryRoutes.GET("/:id", categoryController.GetCategoryByID)
-		categoryRoutes.DELETE("/:id", categoryController.DeleteCategory)
+		categoryRoutes.GET("/:id", middleware.DeserializeUser(userGateway), categoryController.GetCategoryByID)
+		categoryRoutes.DELETE("/:id", middleware.DeserializeUser(userGateway), categoryController.DeleteCategory)
 	}
 
 	variantRepo := repositories.NewVariantRepository(db)
@@ -84,10 +84,10 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 	variantRoutes := router.Group("variants")
 	{
 		variantRoutes.POST("/", middleware.DeserializeUser(userGateway), variantController.CreateVariant)
-		variantRoutes.GET("/:id", variantController.GetVariantById)
-		variantRoutes.GET("/product-id/:id", variantController.GetVariantByProductID)
-		variantRoutes.GET("/variant-name/:variantName", variantController.GetVariantByVariantName)
-		variantRoutes.DELETE("/:id", variantController.DeleteVariant)
+		variantRoutes.GET("/:id", middleware.DeserializeUser(userGateway), variantController.GetVariantById)
+		variantRoutes.GET("/product-id/:id", middleware.DeserializeUser(userGateway), variantController.GetVariantByProductID)
+		variantRoutes.GET("/variant-name/:variantName", middleware.DeserializeUser(userGateway), variantController.GetVariantByVariantName)
+		variantRoutes.DELETE("/:id", middleware.DeserializeUser(userGateway), variantController.DeleteVariant)
 	}
 
 	inventoryRepo := repositories.NewInventoryRepository(db)
@@ -98,8 +98,8 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 	{
 		inventoryRoutes.POST("/", middleware.DeserializeUser(userGateway), inventoryController.CreateInventory)
 		inventoryRoutes.GET("/:id", inventoryController.GetInventoryByID)
-		inventoryRoutes.GET("/variant/:variant_id", inventoryController.GetInventoryByVariantID)
-		inventoryRoutes.DELETE("/:id", inventoryController.DeleteInventory)
+		inventoryRoutes.GET("/variant/:id", middleware.DeserializeUser(userGateway), inventoryController.GetInventoryByVariantID)
+		inventoryRoutes.DELETE("/:id", middleware.DeserializeUser(userGateway), inventoryController.DeleteInventory)
 	}
 
 	productImageRepo := repositories.NewProductImageRepository(db)
@@ -109,9 +109,9 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 	productImageRoutes := router.Group("product-images")
 	{
 		productImageRoutes.POST("/", middleware.DeserializeUser(userGateway), productImageController.CreateProductImage)
-		productImageRoutes.GET("/:id", productImageController.GetProductImageByID)
-		productImageRoutes.PUT("/:id", productImageController.UpdateProductImage)
-		productImageRoutes.DELETE("/:id", productImageController.DeleteProductImage)
+		productImageRoutes.GET("/:id", middleware.DeserializeUser(userGateway), productImageController.GetProductImageByID)
+		productImageRoutes.PUT("/:id", middleware.DeserializeUser(userGateway), productImageController.UpdateProductImage)
+		productImageRoutes.DELETE("/:id", middleware.DeserializeUser(userGateway), productImageController.DeleteProductImage)
 	}
 
 }

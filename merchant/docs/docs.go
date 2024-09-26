@@ -203,7 +203,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/inventory/variant/{variant_id}": {
+        "/inventory/variant/{id}": {
             "get": {
                 "description": "Get an inventory by its Variant ID",
                 "consumes": [
@@ -220,7 +220,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Variant ID",
-                        "name": "variant_id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -348,13 +348,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "merchants"
+                    "Merchants"
                 ],
                 "summary": "GetMerchantByMerchantID",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "merchantID",
+                        "description": "Merchant ID",
                         "name": "merchantID",
                         "in": "path"
                     }
@@ -384,7 +384,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "merchants"
+                    "Merchants"
                 ],
                 "summary": "GetMerchant",
                 "parameters": [

@@ -24,3 +24,15 @@ func (r *InventoryRepository) GetByVariantID(variantID uint) (*models.Inventory,
 	}
 	return &inventory, nil
 }
+
+func (r *InventoryRepository) Create(inventory *models.Inventory) (*models.Inventory, error) {
+	err := r.GetDB().Create(inventory).Error
+	if err != nil {
+		return nil, err
+	}
+	err = r.GetDB().First(inventory).Error
+	if err != nil {
+		return nil, err
+	}
+	return inventory, nil
+}

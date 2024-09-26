@@ -41,8 +41,12 @@ func (r *ProductRepository) UpdateStock(id uint, quantity int) error {
 func (r *ProductRepository) FilterProductsWithPagination(filter dto.FilterOptions, page, pageSize int) (*dto.PaginationResult, error) {
 	var products []models.Product
 	var totalItems int64
-
-	query := r.GetDB().Model(&models.Product{}).Preload("Variants")
+	query := r.GetDB().Model(&models.Product{}).
+		Preload("Variants").
+		Preload("Variants.Inventory").
+		Preload("Category").
+		Preload("Merchant").
+		Select("products.id, products.name, products.description, products.price, products.category_id, products.merchant_id, products.sku, products.created_at, products.updated_at, products.deleted_at")
 
 	// Apply filters
 	if filter.Name != "" {

@@ -5,10 +5,11 @@ import (
 	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/models"
 	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/models/dto"
 	"github.com/VuThanhThien/golang-gorm-postgres/merchant/pkg/rabbitmq"
+	"gorm.io/gorm"
 )
 
 type IMerchantService interface {
-	GetMerchantByID(id string) (*models.Merchant, error)
+	GetMerchantByID(id uint) (*models.Merchant, error)
 	GetMerchantByMerchantID(merchantID string) (*models.Merchant, error)
 	CreateMerchantWithTx(dto *dto.CreateMerchantDTO) (*models.Merchant, error)
 	UpdateMerchantWithTx(dto *dto.UpdateMerchantDTO) (*models.Merchant, error)
@@ -23,8 +24,15 @@ func NewMerchantService(repo *repositories.MerchantRepository, createMerchantPub
 	return &MerchantService{repo: repo, CreateMerchantPublisher: createMerchantPublisher}
 }
 
-func (s *MerchantService) GetMerchantByID(id string) (*models.Merchant, error) {
-	return s.repo.GetByID(id)
+func (s *MerchantService) GetMerchantByID(id uint) (*models.Merchant, error) {
+	merchant, err := s.repo.GetByID(id)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return merchant, nil
 }
 
 func (s *MerchantService) GetMerchantByMerchantID(merchantID string) (*models.Merchant, error) {
@@ -34,9 +42,9 @@ func (s *MerchantService) GetMerchantByMerchantID(merchantID string) (*models.Me
 func (s *MerchantService) CreateMerchantWithTx(dto *dto.CreateMerchantDTO) (*models.Merchant, error) {
 	merchant := &models.Merchant{
 		Name:        dto.Name,
-		MerchantId:  dto.MerchantId,
+		MerchantID:  dto.MerchantID,
 		Description: dto.Description,
-		UserId:      dto.UserId,
+		UserID:      dto.UserID,
 	}
 
 	tx := s.repo.GetDB().Begin()
@@ -57,7 +65,7 @@ func (s *MerchantService) CreateMerchantWithTx(dto *dto.CreateMerchantDTO) (*mod
 func (s *MerchantService) UpdateMerchantWithTx(dto *dto.UpdateMerchantDTO) (*models.Merchant, error) {
 	merchant := &models.Merchant{
 		Name:        dto.Name,
-		MerchantId:  dto.MerchantId,
+		MerchantID:  dto.MerchantID,
 		Description: dto.Description,
 	}
 

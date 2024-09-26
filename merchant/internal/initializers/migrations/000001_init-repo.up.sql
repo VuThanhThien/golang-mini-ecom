@@ -64,10 +64,11 @@ CREATE TABLE IF NOT EXISTS product_images (
 );
 
 -- Create Inventory table
-CREATE TABLE IF NOT EXISTS inventory (
+CREATE TABLE IF NOT EXISTS inventories (
     id BIGSERIAL PRIMARY KEY,
     variant_id BIGINT,
     quantity INT DEFAULT 0,
+    created_at TIMESTAMP,
     updated_at TIMESTAMP,
     deleted_at TIMESTAMP DEFAULT NULL,
     FOREIGN KEY (variant_id) REFERENCES variants(id) ON DELETE CASCADE

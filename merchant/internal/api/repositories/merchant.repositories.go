@@ -6,30 +6,19 @@ import (
 )
 
 type MerchantRepository struct {
-	db *gorm.DB
-}
-
-func (r *MerchantRepository) GetDB() *gorm.DB {
-	return r.db
+	BaseRepository[models.Merchant]
 }
 
 func NewMerchantRepository(db *gorm.DB) *MerchantRepository {
-	return &MerchantRepository{db: db}
-}
-
-func (r *MerchantRepository) Create(merchant *models.Merchant) error {
-	return r.db.Create(merchant).Error
-}
-
-func (r *MerchantRepository) GetByID(id string) (*models.Merchant, error) {
-	var merchant models.Merchant
-	err := r.db.Where("id::text = ?", id).First(&merchant).Error
-	return &merchant, err
+	return &MerchantRepository{BaseRepository: NewBaseRepository[models.Merchant](db)}
 }
 
 func (r *MerchantRepository) GetByMerchantID(merchantID string) (*models.Merchant, error) {
 	var merchant models.Merchant
-	err := r.db.Where("merchant_id = ?", merchantID).First(&merchant).Error
+	err := r.GetDB().Where("merchant_id = ?", merchantID).First(&merchant).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
 	return &merchant, err
 }
 

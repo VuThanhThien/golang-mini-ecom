@@ -35,7 +35,7 @@ func (c *InventoryController) CreateInventory(ctx *gin.Context) {
 
 	inventory, err := c.inventoryService.CreateInventory(&inventoryDTO)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
@@ -52,14 +52,15 @@ func (c *InventoryController) CreateInventory(ctx *gin.Context) {
 // @Success 200 {object} dto.InventoryDTO
 // @Router /inventory/{id} [get]
 func (c *InventoryController) GetInventoryByID(ctx *gin.Context) {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid inventory ID"})
+	var readIdRequest dto.ReadIdRequest
+	if err := ctx.ShouldBindUri(&readIdRequest); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	inventory, err := c.inventoryService.GetInventoryByID(uint(id))
+
+	inventory, err := c.inventoryService.GetInventoryByID(uint(readIdRequest.ID))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
@@ -72,18 +73,18 @@ func (c *InventoryController) GetInventoryByID(ctx *gin.Context) {
 // @Tags Inventory
 // @Accept json
 // @Produce json
-// @Param variant_id path string true "Variant ID"
+// @Param id path string true "Variant ID"
 // @Success 200 {object} dto.InventoryDTO
-// @Router /inventory/variant/{variant_id} [get]
+// @Router /inventory/variant/{id} [get]
 func (c *InventoryController) GetInventoryByVariantID(ctx *gin.Context) {
-	variantID, err := strconv.ParseUint(ctx.Param("variant_id"), 10, 64)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid variant ID"})
+	var readIdRequest dto.ReadIdRequest
+	if err := ctx.ShouldBindUri(&readIdRequest); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	inventory, err := c.inventoryService.GetInventoryByVariantID(uint(variantID))
+	inventory, err := c.inventoryService.GetInventoryByVariantID(uint(readIdRequest.ID))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
@@ -102,13 +103,13 @@ func (c *InventoryController) GetInventoryByVariantID(ctx *gin.Context) {
 func (c *InventoryController) DeleteInventory(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid inventory ID"})
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
 	err = c.inventoryService.DeleteInventory(uint(id))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 

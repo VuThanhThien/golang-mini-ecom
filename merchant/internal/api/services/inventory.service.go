@@ -22,7 +22,12 @@ func NewInventoryService(inventoryRepository *repositories.InventoryRepository) 
 }
 
 func (s *InventoryService) GetInventoryByID(id uint) (*models.Inventory, error) {
-	return s.inventoryRepository.GetByID(id)
+	var inventory models.Inventory
+	err := s.inventoryRepository.GetDB().Where("id = ?", id).First(&inventory).Error
+	if err != nil {
+		return nil, err
+	}
+	return &inventory, nil
 }
 
 func (s *InventoryService) GetInventoryByVariantID(variantID uint) (*models.Inventory, error) {
@@ -30,15 +35,25 @@ func (s *InventoryService) GetInventoryByVariantID(variantID uint) (*models.Inve
 }
 
 func (s *InventoryService) CreateInventory(dto *dto.InventoryDTO) (*models.Inventory, error) {
-	inventory := &models.Inventory{
+	existingInventory, err := s.inventoryRepository.GetByVariantID(dto.VariantID)
+	if err == nil {
+		existingInventory.Quantity = dto.Quantity
+		err = s.inventoryRepository.Update(existingInventory)
+		if err != nil {
+			return nil, err
+		}
+		return existingInventory, nil
+	}
+
+	newInventory := &models.Inventory{
 		Quantity:  dto.Quantity,
 		VariantID: dto.VariantID,
 	}
-	err := s.inventoryRepository.Create(inventory)
+	createdInventory, err := s.inventoryRepository.Create(newInventory)
 	if err != nil {
 		return nil, err
 	}
-	return inventory, nil
+	return createdInventory, nil
 }
 
 func (s *InventoryService) DeleteInventory(id uint) error {

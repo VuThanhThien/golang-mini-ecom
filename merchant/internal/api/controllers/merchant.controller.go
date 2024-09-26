@@ -6,7 +6,6 @@ import (
 	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/api/services"
 	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/middleware"
 	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/models/dto"
-	"github.com/VuThanhThien/golang-gorm-postgres/merchant/pkg/pb"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,7 +21,7 @@ func NewMerchantController(service services.IMerchantService) MerchantController
 //
 //		@Summary		GetMerchant
 //		@Description	GetMerchant
-//		@Tags			merchants
+//		@Tags			Merchants
 //		@Accept			json
 //		@Produce		json
 //		@Param			id		path		string			false	"id"
@@ -30,10 +29,28 @@ func NewMerchantController(service services.IMerchantService) MerchantController
 //	 	@Security		Bearer
 //		@Router			/merchants/{id} [get]
 func (uc *MerchantController) GetMerchant(c *gin.Context) {
-	id := c.Param("id")
-	merchant, err := uc.service.GetMerchantByID(id)
+	user, err := middleware.GetUserFromMiddleware(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+	var readIdRequest dto.ReadIdRequest
+	if err := c.ShouldBindUri(&readIdRequest); err != nil {
+		c.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	merchant, err := uc.service.GetMerchantByID(uint(readIdRequest.ID))
+	if merchant.UserID != uint(user.Id) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You are not allowed to access this merchant"})
+		return
+	}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	if merchant == nil {
+		c.JSON(http.StatusNoContent, gin.H{"error": "Merchant not found"})
 		return
 	}
 
@@ -44,19 +61,27 @@ func (uc *MerchantController) GetMerchant(c *gin.Context) {
 //
 //		@Summary		GetMerchantByMerchantID
 //		@Description	GetMerchantByMerchantID
-//		@Tags			merchants
+//		@Tags			Merchants
 //		@Accept			json
 //		@Produce		json
-//		@Param			merchantID	path		string			false	"merchantID"
+//		@Param			merchantID	path		string			false	"Merchant ID"
 //		@Success		200	{object}		object
 //	 	@Security		Bearer
 //		@Router			/merchants/merchant-id/{merchantID} [get]
 func (uc *MerchantController) GetMerchantByMerchantID(c *gin.Context) {
-	merchantID := c.Param("merchantID")
+	var readMerchantRequest dto.ReadMerchantRequest
+	if err := c.ShouldBindUri(&readMerchantRequest); err != nil {
+		c.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
 
-	merchant, err := uc.service.GetMerchantByMerchantID(merchantID)
+	merchant, err := uc.service.GetMerchantByMerchantID(readMerchantRequest.MerchantID)
+	if merchant == nil {
+		c.JSON(http.StatusNoContent, gin.H{"error": "Merchant not found"})
+		return
+	}
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
@@ -75,14 +100,13 @@ func (uc *MerchantController) GetMerchantByMerchantID(c *gin.Context) {
 //		@Router			/merchants [post]
 //		@Success		200	{object}		object
 func (uc *MerchantController) CreateMerchant(c *gin.Context) {
-	value, oke := c.Get(middleware.CURRENT_USER)
-	if !oke {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "You are not logged in"})
+	user, err := middleware.GetUserFromMiddleware(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
-	user := value.(*pb.User)
 	var createMerchantDTO dto.CreateMerchantDTO
-	createMerchantDTO.UserId = uint(user.Id)
+	createMerchantDTO.UserID = uint(user.Id)
 	if err := c.ShouldBindJSON(&createMerchantDTO); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))
 		return

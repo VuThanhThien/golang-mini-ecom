@@ -269,7 +269,7 @@ paths:
       summary: Get an inventory by ID
       tags:
       - Inventory
-  /inventory/variant/{variant_id}:
+  /inventory/variant/{id}:
     get:
       consumes:
       - application/json
@@ -277,7 +277,7 @@ paths:
       parameters:
       - description: Variant ID
         in: path
-        name: variant_id
+        name: id
         required: true
         type: string
       produces:
@@ -335,14 +335,14 @@ paths:
       - Bearer: []
       summary: GetMerchant
       tags:
-      - merchants
+      - Merchants
   /merchants/merchant-id/{merchantID}:
     get:
       consumes:
       - application/json
       description: GetMerchantByMerchantID
       parameters:
-      - description: merchantID
+      - description: Merchant ID
         in: path
         name: merchantID
         type: string
@@ -357,7 +357,7 @@ paths:
       - Bearer: []
       summary: GetMerchantByMerchantID
       tags:
-      - merchants
+      - Merchants
   /product-images:
     post:
       consumes:

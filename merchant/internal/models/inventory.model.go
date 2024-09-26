@@ -6,7 +6,6 @@ import (
 
 type Inventory struct {
 	gorm.Model
-	VariantID uint    `gorm:"index"`
-	Variant   Variant `gorm:"foreignKey:VariantID"`
-	Quantity  int     `gorm:"default:0"`
+	VariantID uint `gorm:"index"`
+	Quantity  int  `gorm:"default:0"`
 }

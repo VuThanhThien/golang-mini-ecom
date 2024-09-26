@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -32,26 +31,26 @@ func DeserializeUser(userGateway grpc.IUserGateway) gin.HandlerFunc {
 		}
 
 		if accessToken == "" {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": "You are not logged in"})
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "You are not logged in"})
 			return
 		}
 
 		config, _ := initializers.LoadConfig(".")
 		sub, err := utils.ValidateToken(accessToken, config.AccessTokenPublicKey)
 		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": err.Error()})
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 			return
 		}
 
 		userID, err := strconv.ParseUint(fmt.Sprint(sub), 10, 32)
 		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "invalid user ID"})
+			ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"message": "invalid user ID"})
 			return
 		}
 
-		user, err := userGateway.Get(context.Background(), uint(userID))
+		user, err := userGateway.Get(ctx, uint(userID))
 		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user belonging to this token no longer exists"})
+			ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"message": "the user belonging to this token no longer exists"})
 			return
 		}
 
