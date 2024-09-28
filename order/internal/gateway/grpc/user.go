@@ -20,7 +20,7 @@ type UserGateway struct {
 	port string
 }
 
-func New(host string, port string) *UserGateway {
+func NewUserGateway(host string, port string) *UserGateway {
 	return &UserGateway{host, port}
 }
 

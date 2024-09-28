@@ -23,6 +23,7 @@ type Publisher struct {
 	exchangeName string
 	exchangeType string
 	queueName    string
+	routingKey   string // Added routing key
 }
 
 func (p Publisher) PublishMessage(msg interface{}) error {
@@ -72,7 +73,7 @@ func (p Publisher) PublishMessage(msg interface{}) error {
 		CorrelationId: correlationId,
 	}
 
-	err = channel.Publish(p.exchangeName, p.queueName, false, false, publishingMsg)
+	err = channel.Publish(p.exchangeName, p.routingKey, false, false, publishingMsg) // Use routing key instead of queue name
 
 	if err != nil {
 		p.log.Fatal().Err(err).Msg("Error in publishing message")
@@ -92,13 +93,16 @@ func NewPublisher(
 	exchangeName string,
 	exchangeType string,
 	queueName string,
+	routingKey string, // Added routing key parameter
 ) IPublisher {
 	return &Publisher{
 		ctx:          ctx,
 		cfg:          cfg,
 		conn:         conn,
+		log:          log,
 		exchangeName: exchangeName,
 		exchangeType: exchangeType,
 		queueName:    queueName,
+		routingKey:   routingKey, // Set routing key
 	}
 }

@@ -113,10 +113,6 @@ func (c Consumer[T]) ConsumeMessage(msg interface{}, dependencies T) error {
 					return
 				}
 
-				// Extract headers
-				// TODO
-				// c.ctx = otel.ExtractAMQPHeaders(c.ctx, delivery.Headers)
-
 				err := c.handler(q.Name, delivery, dependencies)
 				if err != nil {
 					c.log.Fatal().Err(err).Msg(err.Error())
@@ -164,7 +160,7 @@ func (c Consumer[T]) IsConsumed(msg interface{}) bool {
 
 		isConsumed = linq.From(consumedMessages).Contains(snakeTypeName)
 
-		timeOutExpired = time.Now().Sub(startTime) > timeOutTime
+		timeOutExpired = time.Since(startTime) > timeOutTime
 	}
 }
 

@@ -14,9 +14,18 @@ func NewOrderRepository(db *gorm.DB) *OrderRepository {
 	return &OrderRepository{BaseRepository: NewBaseRepository[models.Order](db)}
 }
 
+func (r *OrderRepository) GetByID(id uint) (*models.Order, error) {
+	var order models.Order
+	err := r.GetDB().Preload("Items").Where("id = ?", id).First(&order).Error
+	if err != nil {
+		return nil, err
+	}
+	return &order, nil
+}
+
 func (r *OrderRepository) GetByOrderId(orderId string) (*models.Order, error) {
 	var order models.Order
-	err := r.GetDB().Where("order_id = ?", orderId).First(&order).Error
+	err := r.GetDB().Preload("Items").Where("order_id = ?", orderId).First(&order).Error
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +34,7 @@ func (r *OrderRepository) GetByOrderId(orderId string) (*models.Order, error) {
 
 func (r *OrderRepository) GetOrders(dto dto.GetOrderRequestDto) ([]models.Order, error) {
 	var orders []models.Order
-	query := r.GetDB()
+	query := r.GetDB().Preload("Items")
 
 	if dto.UserID != 0 {
 		query = query.Where("user_id = ?", dto.UserID)

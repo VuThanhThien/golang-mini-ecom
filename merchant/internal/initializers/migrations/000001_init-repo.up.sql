@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS merchants (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    merchant_id VARCHAR(255) UNIQUE NOT NULL,
+    merchant_code VARCHAR(255) UNIQUE NOT NULL,
     user_id BIGINT NOT NULL,
     description VARCHAR(255),
     created_at TIMESTAMP NOT NULL,

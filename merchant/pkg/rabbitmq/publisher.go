@@ -60,7 +60,6 @@ func (p Publisher) PublishMessage(msg interface{}) error {
 		return err
 	}
 
-	// TODO
 	correlationId := ""
 
 	publishingMsg := amqp.Publishing{
@@ -77,13 +76,6 @@ func (p Publisher) PublishMessage(msg interface{}) error {
 
 	if err != nil {
 		p.log.Fatal().Err(err).Msg("Error in publishing message")
-		return err
-	}
-
-	// h, err := jsoniter.Marshal(headers)
-
-	if err != nil {
-		p.log.Fatal().Err(err).Msg("Error in marshalling headers to publish message")
 		return err
 	}
 

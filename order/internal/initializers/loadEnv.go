@@ -29,6 +29,9 @@ type Config struct {
 
 	USER_GRPC_SERVER_PORT string `mapstructure:"USER_GRPC_SERVER_PORT"`
 	USER_GRPC_SERVER_HOST string `mapstructure:"USER_GRPC_SERVER_HOST"`
+
+	MERCHANT_GRPC_SERVER_PORT string `mapstructure:"MERCHANT_GRPC_SERVER_PORT"`
+	MERCHANT_GRPC_SERVER_HOST string `mapstructure:"MERCHANT_GRPC_SERVER_HOST"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

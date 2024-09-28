@@ -11,6 +11,7 @@ type IInventoryService interface {
 	GetInventoryByVariantID(variantID uint) (*models.Inventory, error)
 	CreateInventory(dto *dto.InventoryDTO) (*models.Inventory, error)
 	DeleteInventory(id uint) error
+	CreateOrderSucceed(dto *dto.CreateOrderSucceed) error
 }
 
 type InventoryService struct {
@@ -58,4 +59,21 @@ func (s *InventoryService) CreateInventory(dto *dto.InventoryDTO) (*models.Inven
 
 func (s *InventoryService) DeleteInventory(id uint) error {
 	return s.inventoryRepository.Delete(id)
+}
+
+func (s *InventoryService) CreateOrderSucceed(dto *dto.CreateOrderSucceed) error {
+
+	for _, item := range dto.Items {
+		inventory, err := s.inventoryRepository.GetByVariantID(item.VariantID)
+		if err != nil {
+			return err
+		}
+		inventory.Quantity -= item.Quantity
+		err = s.inventoryRepository.Update(inventory)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

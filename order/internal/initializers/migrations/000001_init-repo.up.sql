@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS orders (
 -- Create items table
 CREATE TABLE IF NOT EXISTS items (
     id BIGSERIAL PRIMARY KEY,
-    order_id VARCHAR(255) NOT NULL,
+    order_id BIGINT NOT NULL,
     product_id BIGINT NOT NULL,
     variant_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS items (
     deleted_at TIMESTAMP,
     CONSTRAINT fk_order
         FOREIGN KEY(order_id) 
-        REFERENCES orders(order_id)
+        REFERENCES orders(id)
         ON DELETE CASCADE
 );
 

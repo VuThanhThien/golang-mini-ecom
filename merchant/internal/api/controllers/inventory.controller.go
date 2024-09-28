@@ -115,3 +115,28 @@ func (c *InventoryController) DeleteInventory(ctx *gin.Context) {
 
 	ctx.Status(http.StatusNoContent)
 }
+
+// CreateOrderSucceed godoc
+// @Summary Create an order succeed
+// @Description Create an order succeed with the given details
+// @Tags Inventory
+// @Accept json
+// @Produce json
+// @Param orderSucceed body dto.CreateOrderSucceed true "Order succeed details"
+// @Success 200 {object} dto.CreateOrderSucceed
+// @Router /inventory/order-succeed [post]
+func (c *InventoryController) CreateOrderSucceed(ctx *gin.Context) {
+	var orderSucceed dto.CreateOrderSucceed
+	if err := ctx.ShouldBindJSON(&orderSucceed); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	err := c.inventoryService.CreateOrderSucceed(&orderSucceed)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, orderSucceed)
+}

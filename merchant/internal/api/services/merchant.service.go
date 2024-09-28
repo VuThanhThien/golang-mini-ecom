@@ -41,10 +41,10 @@ func (s *MerchantService) GetMerchantByMerchantID(merchantID string) (*models.Me
 
 func (s *MerchantService) CreateMerchantWithTx(dto *dto.CreateMerchantDTO) (*models.Merchant, error) {
 	merchant := &models.Merchant{
-		Name:        dto.Name,
-		MerchantID:  dto.MerchantID,
-		Description: dto.Description,
-		UserID:      dto.UserID,
+		Name:         dto.Name,
+		MerchantCode: dto.MerchantCode,
+		Description:  dto.Description,
+		UserID:       dto.UserID,
 	}
 
 	tx := s.repo.GetDB().Begin()
@@ -64,9 +64,9 @@ func (s *MerchantService) CreateMerchantWithTx(dto *dto.CreateMerchantDTO) (*mod
 
 func (s *MerchantService) UpdateMerchantWithTx(dto *dto.UpdateMerchantDTO) (*models.Merchant, error) {
 	merchant := &models.Merchant{
-		Name:        dto.Name,
-		MerchantID:  dto.MerchantID,
-		Description: dto.Description,
+		Name:         dto.Name,
+		MerchantCode: dto.MerchantCode,
+		Description:  dto.Description,
 	}
 
 	tx := s.repo.GetDB().Begin()

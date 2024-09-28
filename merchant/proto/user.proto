@@ -4,7 +4,7 @@ package pb;
 
 import "google/api/annotations.proto";
 
-option go_package = "github.com/VuThanhThien/golang-gorm-postgres/authentication/pkg/pb";
+option go_package = "github.com/VuThanhThien/golang-gorm-postgres/merchant/pkg/pb";
 
 message User {
   uint64 id = 1;

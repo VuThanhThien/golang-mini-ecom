@@ -42,10 +42,10 @@ func (r *ProductRepository) FilterProductsWithPagination(filter dto.FilterOption
 	var products []models.Product
 	var totalItems int64
 	query := r.GetDB().Model(&models.Product{}).
+		Preload("Merchant").
 		Preload("Variants").
 		Preload("Variants.Inventory").
 		Preload("Category").
-		Preload("Merchant").
 		Select("products.id, products.name, products.description, products.price, products.category_id, products.merchant_id, products.sku, products.created_at, products.updated_at, products.deleted_at")
 
 	// Apply filters

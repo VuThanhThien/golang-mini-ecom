@@ -7,7 +7,7 @@ import (
 	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/api/controllers"
 	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/api/repositories"
 	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/api/services"
-	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/gateway/user/grpc"
+	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/gateway/grpc"
 	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/initializers"
 	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/middleware"
 	"github.com/VuThanhThien/golang-gorm-postgres/order/pkg/rabbitmq"
@@ -33,13 +33,14 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 		log,
 		rabbitmq.E_COM_EXCHANGE,
 		"direct",
+		rabbitmq.PAYMENT_ORDER_COMPLETED_QUEUE,
 		rabbitmq.CREATE_ORDER_ROUTING_KEY,
 	)
-	userGateway := grpc.New(config.USER_GRPC_SERVER_HOST, config.USER_GRPC_SERVER_PORT)
-
+	userGateway := grpc.NewUserGateway(config.USER_GRPC_SERVER_HOST, config.USER_GRPC_SERVER_PORT)
+	inventoryGateway := grpc.NewInventoryGateway(config.MERCHANT_GRPC_SERVER_HOST, config.MERCHANT_GRPC_SERVER_PORT)
 	orderRepo := repositories.NewOrderRepository(db)
 	orderItemRepo := repositories.NewItemRepository(db)
-	orderService := services.NewOrderService(orderRepo, orderItemRepo, createOrderPublisher)
+	orderService := services.NewOrderService(orderRepo, orderItemRepo, createOrderPublisher, inventoryGateway)
 	orderController := controllers.NewOrderController(orderService)
 	router.GET("/healthcheck", func(ctx *gin.Context) {
 		message := "Welcome to Golang with Gorm and Postgres"
@@ -47,7 +48,7 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 	})
 	orderRoutes := router.Group("orders")
 	{
-
+		orderRoutes.GET("/", middleware.DeserializeUser(userGateway), orderController.GetOrders)
 		orderRoutes.GET("/:id", middleware.DeserializeUser(userGateway), orderController.GetOrder)
 		orderRoutes.POST("/", middleware.DeserializeUser(userGateway), orderController.CreateOrder)
 	}

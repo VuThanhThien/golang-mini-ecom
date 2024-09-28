@@ -16,6 +16,30 @@ func NewOrderController(service services.IOrderService) OrderController {
 	return OrderController{service: service}
 }
 
+// @Summary Get Orders
+// @Description Get orders by filter
+// @Tags Orders
+// @Accept json
+// @Produce json
+// @Param order query dto.GetOrderRequestDto true "Order details"
+// @Success 200 {object} dto.GetOrderResponseDto
+// @Failure 400 {object} gin.H
+// @Failure 500 {object} gin.H
+// @Router /orders [get]
+func (c *OrderController) GetOrders(ctx *gin.Context) {
+	var getOrderDto dto.GetOrderRequestDto
+	if err := ctx.ShouldBindQuery(&getOrderDto); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	orders, err := c.service.GetOrders(getOrderDto)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"data": orders})
+}
+
 // @Summary Get Order
 // @Description Get an order by ID
 // @Tags Orders

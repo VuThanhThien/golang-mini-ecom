@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,10 +14,14 @@ import (
 	"context"
 
 	_ "github.com/VuThanhThien/golang-gorm-postgres/merchant/docs"
+	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/api/repositories"
+	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/api/services"
+	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/grpc_handler"
 	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/initializers"
 	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/middleware"
 	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/routes"
 	"github.com/VuThanhThien/golang-gorm-postgres/merchant/pkg/logger"
+	"github.com/VuThanhThien/golang-gorm-postgres/merchant/pkg/pb"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -24,6 +29,9 @@ import (
 	"github.com/streadway/amqp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+	"gorm.io/gorm"
 )
 
 var (
@@ -48,6 +56,8 @@ func init() {
 	}
 
 	server = gin.Default()
+
+	go runGrpcServer(config, initializers.DB, log)
 }
 
 //	@title						Swagger Merchant API
@@ -120,7 +130,7 @@ func runGinServer(config initializers.Config, log zerolog.Logger) {
 		c.HTML(404, "404.html", gin.H{})
 	})
 
-	routes.SetupRoutes(server, initializers.DB, RMQ, log, &config)
+	routes.SetupRoutes(server, initializers.DB, RMQ, log, &config, context.Background())
 
 	fmt.Printf("🚀 ~running on: http://localhost:%s/swagger/index.html 🚀 \n", config.ServerPort)
 
@@ -137,4 +147,26 @@ func runGinServer(config initializers.Config, log zerolog.Logger) {
 		log.Error().Err(err).Msg("Server forced to shutdown")
 	}
 
+}
+
+func runGrpcServer(cfg initializers.Config, db *gorm.DB, log zerolog.Logger) {
+	userRepo := repositories.NewInventoryRepository(db)
+	userService := services.NewInventoryService(userRepo)
+	server := grpc_handler.NewServer(userService)
+
+	grpcServer := grpc.NewServer()
+	pb.RegisterOrderGrpcServer(grpcServer, server)
+	reflection.Register(grpcServer)
+
+	grpcServerAddress := fmt.Sprintf("%s:%s", cfg.MERCHANT_GRPC_SERVER_HOST, cfg.MERCHANT_GRPC_SERVER_PORT)
+	listener, err := net.Listen("tcp", grpcServerAddress)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Cannot listen grpc server")
+	}
+
+	log.Printf("start gRPC server at %s", listener.Addr().String())
+	err = grpcServer.Serve(listener)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Cannot start grpc server")
+	}
 }

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/gateway/user/grpc"
+	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/gateway/grpc"
 	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/initializers"
 	"github.com/VuThanhThien/golang-gorm-postgres/order/utils"
 	"github.com/gin-gonic/gin"
