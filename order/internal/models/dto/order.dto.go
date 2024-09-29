@@ -77,3 +77,11 @@ type UpdateOrderRequestDto struct {
 	ID     uint        `json:"id" validate:"required"`
 	Status OrderStatus `json:"status" validate:"required"`
 }
+
+type PaginationResult struct {
+	Data       []models.Order `json:"data"`
+	TotalItems int64          `json:"total_items"`
+	TotalPages int            `json:"total_pages"`
+	Page       int            `json:"page"`
+	PageSize   int            `json:"page_size"`
+}

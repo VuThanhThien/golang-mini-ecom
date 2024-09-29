@@ -13,6 +13,7 @@ type IMerchantService interface {
 	GetMerchantByMerchantID(merchantID string) (*models.Merchant, error)
 	CreateMerchantWithTx(dto *dto.CreateMerchantDTO) (*models.Merchant, error)
 	UpdateMerchantWithTx(dto *dto.UpdateMerchantDTO) (*models.Merchant, error)
+	GetMerchantByUserID(userID uint) (*models.Merchant, error)
 }
 
 type MerchantService struct {
@@ -78,4 +79,8 @@ func (s *MerchantService) UpdateMerchantWithTx(dto *dto.UpdateMerchantDTO) (*mod
 		return nil, err
 	}
 	return merchant, nil
+}
+
+func (s *MerchantService) GetMerchantByUserID(userID uint) (*models.Merchant, error) {
+	return s.repo.GetByUserID(userID)
 }

@@ -23,11 +23,18 @@ type ReadUserRequest struct {
 	ID uint `uri:"id" binding:"required,min=1"`
 }
 
+type UserRole string
+
+const (
+	UserRoleAdmin UserRole = "admin"
+	UserRoleUser  UserRole = "user"
+)
+
 type UserResponse struct {
 	ID        uint      `json:"id,omitempty"`
 	Name      string    `json:"name,omitempty"`
 	Email     string    `json:"email,omitempty"`
-	Role      string    `json:"role,omitempty"`
+	Role      UserRole  `json:"role,omitempty"`
 	Photo     string    `json:"photo,omitempty"`
 	Provider  string    `json:"provider"`
 	CreatedAt time.Time `json:"created_at"`
@@ -35,10 +42,10 @@ type UserResponse struct {
 }
 
 type ListUserDto struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Role     string `json:"role"`
-	Provider string `json:"provider"`
+	Name     string   `json:"name"`
+	Email    string   `json:"email"`
+	Role     UserRole `json:"role"`
+	Provider string   `json:"provider"`
 }
 
 type UserListResponse struct {
@@ -55,7 +62,7 @@ func ToUserListResponse(users []models.User) UserListResponse {
 			UpdatedAt: user.UpdatedAt,
 			Name:      user.Name,
 			Email:     user.Email,
-			Role:      user.Role,
+			Role:      UserRole(user.Role),
 			Photo:     user.Photo,
 			Provider:  user.Provider,
 		}
@@ -71,7 +78,7 @@ func ToUserResponse(user *models.User) *UserResponse {
 		ID:        user.ID,
 		Name:      user.Name,
 		Email:     user.Email,
-		Role:      user.Role,
+		Role:      UserRole(user.Role),
 		Photo:     user.Photo,
 		Provider:  user.Provider,
 		CreatedAt: user.CreatedAt,

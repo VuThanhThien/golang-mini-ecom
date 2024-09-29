@@ -1,20 +1,26 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/api/services"
+	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/middleware"
 	"github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/models/dto"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/exp/rand"
 )
 
 type ProductController struct {
-	service services.IProductService
+	service         services.IProductService
+	merchantService services.IMerchantService
 }
 
-func NewProductController(service services.IProductService) ProductController {
-	return ProductController{service: service}
+func NewProductController(service services.IProductService, merchantService services.IMerchantService) ProductController {
+	return ProductController{service: service, merchantService: merchantService}
 }
 
 // FilterProductsWithPagination godoc
@@ -96,12 +102,35 @@ func (c *ProductController) GetProductByID(ctx *gin.Context) {
 // @Router			/products [post]
 // @Success		200	{object}		object
 func (c *ProductController) CreateProduct(ctx *gin.Context) {
-	var input *dto.CreateProductDTO
-	if err := ctx.ShouldBindJSON(&input); err != nil {
+	user, err := middleware.GetUserFromMiddleware(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+	merchant, err := c.merchantService.GetMerchantByID(uint(user.Id))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	if merchant == nil {
+		ctx.JSON(http.StatusForbidden, errorResponse(fmt.Errorf("user is not associated with any merchant")))
+		return
+	}
+
+	var productDto *dto.CreateProductDTO
+	if err := ctx.ShouldBindJSON(&productDto); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	product, err := c.service.CreateProduct(input)
+	var productInput = &dto.CreateProductInput{
+		Name:        productDto.Name,
+		Description: productDto.Description,
+		Price:       productDto.Price,
+		CategoryID:  productDto.CategoryID,
+		MerchantID:  merchant.ID,
+		SKU:         generateSKU(productDto.Name),
+	}
+	product, err := c.service.CreateProduct(productInput)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -111,11 +140,11 @@ func (c *ProductController) CreateProduct(ctx *gin.Context) {
 
 // DeleteProduct godoc
 //
-// @Summary		DeleteProduct
-// @Description	DeleteProduct
+// @Summary			DeleteProduct
+// @Description		DeleteProduct
 // @Tags			Products
 // @Accept			json
-// @Produce		json
+// @Produce			json
 // @Param			id		path		string			false	"id"
 // @Security		Bearer
 // @Router			/products/{id} [delete]
@@ -156,4 +185,11 @@ func (c *ProductController) GetProductByProductID(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, product)
+}
+
+func generateSKU(name string) string {
+	prefix := fmt.Sprintf("%s-", time.Now().Format("20060102"))
+	suffix := fmt.Sprintf("-%d", rand.Intn(10000))
+	sku := strings.ToLower(strings.ReplaceAll(name, " ", "-"))
+	return prefix + sku + suffix
 }

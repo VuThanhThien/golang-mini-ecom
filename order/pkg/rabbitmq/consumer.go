@@ -2,12 +2,12 @@ package rabbitmq
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"time"
 
 	"github.com/ahmetb/go-linq/v3"
 	"github.com/iancoleman/strcase"
-	jsoniter "github.com/json-iterator/go"
 	"github.com/rs/zerolog"
 	"github.com/streadway/amqp"
 )
@@ -94,49 +94,25 @@ func (c Consumer[T]) ConsumeMessage(msg interface{}, dependencies T) error {
 		return err
 	}
 
+	forever := make(chan bool)
 	go func() {
-		select {
-		case <-c.ctx.Done():
-			defer func(ch *amqp.Channel) {
-				err := ch.Close()
-				if err != nil {
-					c.log.Fatal().Err(err).Msgf("failed to close channel closed for for queue: %s", q.Name)
-				}
-			}(ch)
-			c.log.Info().Msgf("channel closed for for queue: %s", q.Name)
-			return
-
-		case delivery, ok := <-deliveries:
-			{
-				if !ok {
-					c.log.Fatal().Err(err).Msgf("NOT OK deliveries channel closed for queue: %s", q.Name)
-					return
-				}
-
-				// Extract headers
-				// TODO
-				// c.ctx = otel.ExtractAMQPHeaders(c.ctx, delivery.Headers)
-
-				err := c.handler(q.Name, delivery, dependencies)
-				if err != nil {
-					c.log.Fatal().Err(err).Msg(err.Error())
-				}
-
-				consumedMessages = append(consumedMessages, c.queueName)
-
-				h, err := jsoniter.Marshal(delivery.Headers)
-
-				if err != nil {
-					c.log.Fatal().Err(err).Msgf("Error in marshalling headers in consumer: %v", string(h))
-				}
-
-				err = delivery.Ack(false)
-				if err != nil {
-					c.log.Fatal().Err(err).Msgf("We didn't get a ack for delivery: %v", string(delivery.Body))
-				}
+		for delivery := range deliveries {
+			err := c.handler(q.Name, delivery, dependencies)
+			if err != nil {
+				c.log.Fatal().Err(err).Msg(err.Error())
 			}
+
+			fmt.Println("delivery", delivery)
+			err = delivery.Ack(false)
+			if err != nil {
+				c.log.Fatal().Err(err).Msgf("We didn't get a ack for delivery: %v", string(delivery.Body))
+			}
+			fmt.Println("done")
 		}
 	}()
+
+	fmt.Println("Waiting for messages...")
+	<-forever
 
 	c.log.Info().Msgf("Waiting for messages in queue :%s. To exit press CTRL+C", q.Name)
 

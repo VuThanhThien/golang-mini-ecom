@@ -76,7 +76,7 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 		Name:      newUser.Name,
 		Email:     newUser.Email,
 		Photo:     newUser.Photo,
-		Role:      newUser.Role,
+		Role:      dto.UserRole(newUser.Role),
 		Provider:  newUser.Provider,
 		CreatedAt: newUser.CreatedAt,
 		UpdatedAt: newUser.UpdatedAt,

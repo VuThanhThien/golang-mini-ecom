@@ -50,7 +50,7 @@ func (uc *UserController) ListUsers(c *gin.Context) {
 	pagination.PageSize = &pageSize
 	payload.Email = c.Query("email")
 	payload.Name = c.Query("name")
-	payload.Role = c.Query("role")
+	payload.Role = dto.UserRole(c.Query("role"))
 	payload.Provider = c.Query("provider")
 
 	users, total, err := uc.service.ListUsers(payload, pagination)
@@ -83,7 +83,7 @@ func (uc *UserController) GetMe(ctx *gin.Context) {
 		Name:      currentUser.Name,
 		Email:     currentUser.Email,
 		Photo:     currentUser.Photo,
-		Role:      currentUser.Role,
+		Role:      dto.UserRole(currentUser.Role),
 		Provider:  currentUser.Provider,
 		CreatedAt: currentUser.CreatedAt,
 		UpdatedAt: currentUser.UpdatedAt,

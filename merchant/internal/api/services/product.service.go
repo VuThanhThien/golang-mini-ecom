@@ -9,7 +9,7 @@ import (
 type IProductService interface {
 	GetProductByID(id uint) (*models.Product, error)
 	GetProductByProductID(productID uint) (*models.Product, error)
-	CreateProduct(dto *dto.CreateProductDTO) (*models.Product, error)
+	CreateProduct(dto *dto.CreateProductInput) (*models.Product, error)
 	DeleteProduct(id uint) error
 	FilterProductsWithPagination(filter dto.FilterOptions, page, pageSize int) (*dto.PaginationResult, error)
 	UpdateStock(id uint, quantity int) error
@@ -36,7 +36,7 @@ func (s *ProductService) GetProductByProductID(productID uint) (*models.Product,
 	return s.productRepository.GetByProductID(productID)
 }
 
-func (s *ProductService) CreateProduct(dto *dto.CreateProductDTO) (*models.Product, error) {
+func (s *ProductService) CreateProduct(dto *dto.CreateProductInput) (*models.Product, error) {
 	product := &models.Product{
 		Name:        dto.Name,
 		Description: dto.Description,

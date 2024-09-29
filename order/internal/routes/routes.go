@@ -10,6 +10,8 @@ import (
 	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/gateway/grpc"
 	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/initializers"
 	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/middleware"
+	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/models/dto"
+	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/rabbit_handler"
 	"github.com/VuThanhThien/golang-gorm-postgres/order/pkg/rabbitmq"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
@@ -26,6 +28,7 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 		Password: config.AMQP_SERVER_PASSWORD,
 	}
 
+	//TODO: add refund publisher
 	createOrderPublisher := rabbitmq.NewPublisher(
 		context.Background(),
 		&rabbitCfg,
@@ -33,7 +36,7 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 		log,
 		rabbitmq.E_COM_EXCHANGE,
 		"direct",
-		rabbitmq.PAYMENT_ORDER_COMPLETED_QUEUE,
+		rabbitmq.CREATE_ORDER_COMPLETED_QUEUE,
 		rabbitmq.CREATE_ORDER_ROUTING_KEY,
 	)
 	userGateway := grpc.NewUserGateway(config.USER_GRPC_SERVER_HOST, config.USER_GRPC_SERVER_PORT)
@@ -53,4 +56,25 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 		orderRoutes.POST("/", middleware.DeserializeUser(userGateway), orderController.CreateOrder)
 	}
 
+	paymentDependencies := rabbit_handler.PaymentDependencies{
+		Logger:       log,
+		OrderService: orderService,
+	}
+	userConsumer := rabbitmq.NewConsumer(
+		context.Background(),
+		&rabbitCfg,
+		rabbitConn,
+		log,
+		rabbit_handler.PaymentOrderCompleted,
+		rabbitmq.E_COM_EXCHANGE,
+		"direct",
+		rabbitmq.PAYMENT_ORDER_COMPLETED_QUEUE,
+		rabbitmq.PAYMENT_ORDER_COMPLETED_ROUTING_KEY,
+	)
+	go func() {
+		err := userConsumer.ConsumeMessage(dto.PaymentResponse{}, &paymentDependencies)
+		if err != nil {
+			log.Error().Err(err).Msg("Consume message error")
+		}
+	}()
 }

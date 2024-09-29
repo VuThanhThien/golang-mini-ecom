@@ -35,7 +35,7 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 		log,
 		rabbitmq.E_COM_EXCHANGE,
 		"direct",
-		rabbitmq.PAYMENT_ORDER_COMPLETED_QUEUE,
+		rabbitmq.CREATE_ORDER_COMPLETED_QUEUE,
 	)
 	userGateway := grpc.New(config.USER_GRPC_SERVER_HOST, config.USER_GRPC_SERVER_PORT)
 
@@ -48,7 +48,6 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 	})
 	merchantRoutes := router.Group("merchants")
 	{
-
 		merchantRoutes.GET("/:id", middleware.DeserializeUser(userGateway), merchantController.GetMerchant)
 		merchantRoutes.GET("/merchant-id/:merchantID", middleware.DeserializeUser(userGateway), merchantController.GetMerchantByMerchantID)
 		merchantRoutes.POST("/", middleware.DeserializeUser(userGateway), merchantController.CreateMerchant)
@@ -56,7 +55,7 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 
 	productRepo := repositories.NewProductRepository(db)
 	productService := services.NewProductService(productRepo)
-	productController := controllers.NewProductController(productService)
+	productController := controllers.NewProductController(productService, merchantService)
 
 	productRoutes := router.Group("products")
 	{
@@ -102,7 +101,8 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 		inventoryRoutes.GET("/:id", inventoryController.GetInventoryByID)
 		inventoryRoutes.GET("/variant/:id", middleware.DeserializeUser(userGateway), inventoryController.GetInventoryByVariantID)
 		inventoryRoutes.DELETE("/:id", middleware.DeserializeUser(userGateway), inventoryController.DeleteInventory)
-		inventoryRoutes.POST("/order-succeed", middleware.DeserializeUser(userGateway), inventoryController.CreateOrderSucceed)
+		inventoryRoutes.POST("/order-succeed", middleware.DeserializeUser(userGateway), inventoryController.DeductQuantity)
+		inventoryRoutes.POST("/order-failed", middleware.DeserializeUser(userGateway), inventoryController.RefundQuantity)
 	}
 
 	productImageRepo := repositories.NewProductImageRepository(db)
@@ -117,7 +117,7 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 		productImageRoutes.DELETE("/:id", middleware.DeserializeUser(userGateway), productImageController.DeleteProductImage)
 	}
 
-	OrderDependencies := rabbit_handler.CreateOrderSucceedDependencies{
+	OrderDependencies := rabbit_handler.OrderDependencies{
 		Logger:           log,
 		InventoryService: inventoryService,
 	}
@@ -129,11 +129,11 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 		rabbit_handler.CreateOrderSucceed,
 		rabbitmq.E_COM_EXCHANGE,
 		"direct",
-		rabbitmq.PAYMENT_ORDER_COMPLETED_QUEUE,
+		rabbitmq.CREATE_ORDER_COMPLETED_QUEUE,
 		rabbitmq.CREATE_ORDER_ROUTING_KEY,
 	)
 	go func() {
-		err := userConsumer.ConsumeMessage(dto.CreateOrderSucceed{}, &OrderDependencies)
+		err := userConsumer.ConsumeMessage(dto.CreateOrder{}, &OrderDependencies)
 		if err != nil {
 			log.Error().Err(err).Msg("Consume message error")
 		}

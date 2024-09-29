@@ -18,9 +18,15 @@ type PaginationResult struct {
 	Page       int
 	PageSize   int
 }
-
-// CreateProductDTO represents the data transfer object for creating a product
 type CreateProductDTO struct {
+	Name        string  `json:"name" binding:"required"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price" binding:"required"`
+	CategoryID  uint    `json:"category_id"`
+}
+
+// CreateProductInput represents the data transfer object for creating a product
+type CreateProductInput struct {
 	Name        string  `json:"name" binding:"required"`
 	Description string  `json:"description"`
 	Price       float64 `json:"price" binding:"required"`

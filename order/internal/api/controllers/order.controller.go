@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/api/services"
 	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/models/dto"
@@ -32,9 +33,17 @@ func (c *OrderController) GetOrders(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	orders, err := c.service.GetOrders(getOrderDto)
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("pageSize", "10"))
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 10
+	}
+	orders, err := c.service.GetOrders(getOrderDto, page, pageSize)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"data": orders})
@@ -58,7 +67,7 @@ func (c *OrderController) GetOrder(ctx *gin.Context) {
 	}
 	order, err := c.service.GetOrder(uint(readIdRequest.ID))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"data": order})
@@ -82,7 +91,7 @@ func (c *OrderController) CreateOrder(ctx *gin.Context) {
 	}
 	order, err := c.service.CreateOrder(createOrderDto)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"data": order})

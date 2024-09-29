@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,10 +14,16 @@ import (
 	"context"
 
 	_ "github.com/VuThanhThien/golang-gorm-postgres/order/docs"
+	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/api/repositories"
+	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/api/services"
+	grpc_gateway "github.com/VuThanhThien/golang-gorm-postgres/order/internal/gateway/grpc"
+	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/grpc_handler"
 	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/initializers"
 	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/middleware"
 	"github.com/VuThanhThien/golang-gorm-postgres/order/internal/routes"
 	"github.com/VuThanhThien/golang-gorm-postgres/order/pkg/logger"
+	"github.com/VuThanhThien/golang-gorm-postgres/order/pkg/pb"
+	"github.com/VuThanhThien/golang-gorm-postgres/order/pkg/rabbitmq"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -24,6 +31,9 @@ import (
 	"github.com/streadway/amqp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+	"gorm.io/gorm"
 )
 
 var (
@@ -70,6 +80,8 @@ func main() {
 	}
 
 	runGinServer(config, log)
+
+	go runGrpcServer(config, initializers.DB, log)
 
 }
 
@@ -137,4 +149,43 @@ func runGinServer(config initializers.Config, log zerolog.Logger) {
 		log.Error().Err(err).Msg("Server forced to shutdown")
 	}
 
+}
+
+func runGrpcServer(cfg initializers.Config, db *gorm.DB, log zerolog.Logger) {
+	orderRepo := repositories.NewOrderRepository(db)
+	orderItemRepo := repositories.NewItemRepository(db)
+	createOrderPublisher := rabbitmq.NewPublisher(
+		context.Background(),
+		&rabbitmq.RabbitMQConfig{
+			Host:     cfg.AMQP_SERVER_HOST,
+			Port:     cfg.AMQP_SERVER_PORT,
+			User:     cfg.AMQP_SERVER_USER,
+			Password: cfg.AMQP_SERVER_PASSWORD,
+		},
+		RMQ,
+		log,
+		rabbitmq.E_COM_EXCHANGE,
+		"direct",
+		rabbitmq.CREATE_ORDER_COMPLETED_QUEUE,
+		rabbitmq.CREATE_ORDER_ROUTING_KEY,
+	)
+	inventoryGateway := grpc_gateway.NewInventoryGateway(cfg.MERCHANT_GRPC_SERVER_HOST, cfg.MERCHANT_GRPC_SERVER_PORT)
+	orderService := services.NewOrderService(orderRepo, orderItemRepo, createOrderPublisher, inventoryGateway)
+	server := grpc_handler.NewServer(orderService)
+
+	grpcServer := grpc.NewServer()
+	pb.RegisterInventoryGrpcServer(grpcServer, server)
+	reflection.Register(grpcServer)
+
+	grpcServerAddress := fmt.Sprintf("%s:%s", cfg.ORDER_GRPC_SERVER_HOST, cfg.ORDER_GRPC_SERVER_PORT)
+	listener, err := net.Listen("tcp", grpcServerAddress)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Cannot listen grpc server")
+	}
+
+	log.Printf("start gRPC server at %s", listener.Addr().String())
+	err = grpcServer.Serve(listener)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Cannot start grpc server")
+	}
 }

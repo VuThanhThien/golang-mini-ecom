@@ -29,15 +29,36 @@ message Order {
   string placed_at = 8;
 }
 
+message Inventory {
+  uint64 id = 1;
+  uint64 variant_id = 2;
+  uint64 quantity = 3;
+}
+
 message UpdateInventoryRequest {
   Order order = 1;
 }
 
-service OrderGrpc {
-  rpc UpdateInventory(UpdateInventoryRequest) returns (google.protobuf.Empty) {
+message GetInventoryRequest {
+  uint64 id = 1;
+}
+
+service InventoryGrpc {
+  rpc DeductQuantity(UpdateInventoryRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
         post: "/api/inventory/order-succeed"
         body: "*"
+      };
+  };
+  rpc RefundQuantity(UpdateInventoryRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+        post: "/api/inventory/order-failed"
+        body: "*"
+      };
+  }
+  rpc GetInventory(GetInventoryRequest) returns (Inventory) {
+    option (google.api.http) = {
+        get: "/api/inventory/{id}"
       };
   }
 }

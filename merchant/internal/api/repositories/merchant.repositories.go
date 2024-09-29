@@ -29,3 +29,12 @@ func (r *MerchantRepository) CreateWithTx(tx *gorm.DB, merchant *models.Merchant
 func (r *MerchantRepository) UpdateWithTx(tx *gorm.DB, merchant *models.Merchant) error {
 	return tx.Model(merchant).Updates(merchant).Error
 }
+
+func (r *MerchantRepository) GetByUserID(userID uint) (*models.Merchant, error) {
+	var merchant models.Merchant
+	err := r.GetDB().Where("user_id = ?", userID).First(&merchant).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
+	return &merchant, err
+}

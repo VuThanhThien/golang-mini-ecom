@@ -16,7 +16,7 @@ type Item struct {
 	DeletedAt  time.Time `json:"deleted_at"`
 }
 
-type CreateOrderSucceed struct {
+type CreateOrder struct {
 	ID          uint    `json:"id"`
 	OrderID     string  `json:"order_id"`
 	UserID      uint    `json:"user_id"`

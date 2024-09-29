@@ -116,27 +116,52 @@ func (c *InventoryController) DeleteInventory(ctx *gin.Context) {
 	ctx.Status(http.StatusNoContent)
 }
 
-// CreateOrderSucceed godoc
-// @Summary Create an order succeed
-// @Description Create an order succeed with the given details
+// DeductQuantity godoc
+// @Summary Deduct quantity
+// @Description Deduct quantity with the given details
 // @Tags Inventory
 // @Accept json
 // @Produce json
-// @Param orderSucceed body dto.CreateOrderSucceed true "Order succeed details"
-// @Success 200 {object} dto.CreateOrderSucceed
+// @Param orderSucceed body dto.CreateOrder true "Order succeed details"
+// @Success 200 {object} dto.CreateOrder
 // @Router /inventory/order-succeed [post]
-func (c *InventoryController) CreateOrderSucceed(ctx *gin.Context) {
-	var orderSucceed dto.CreateOrderSucceed
+func (c *InventoryController) DeductQuantity(ctx *gin.Context) {
+	var orderSucceed dto.CreateOrder
 	if err := ctx.ShouldBindJSON(&orderSucceed); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	err := c.inventoryService.CreateOrderSucceed(&orderSucceed)
+	err := c.inventoryService.DeductQuantity(&orderSucceed)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
 	ctx.JSON(http.StatusOK, orderSucceed)
+}
+
+// RefundQuantity godoc
+// @Summary Refund quantity
+// @Description Refund quantity with the given details
+// @Tags Inventory
+// @Accept json
+// @Produce json
+// @Param orderFailed body dto.CreateOrder true "Order failed details"
+// @Success 200 {object} dto.CreateOrder
+// @Router /inventory/order-failed [post]
+func (c *InventoryController) RefundQuantity(ctx *gin.Context) {
+	var orderFailed dto.CreateOrder
+	if err := ctx.ShouldBindJSON(&orderFailed); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	err := c.inventoryService.RefundQuantity(&orderFailed)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, orderFailed)
 }

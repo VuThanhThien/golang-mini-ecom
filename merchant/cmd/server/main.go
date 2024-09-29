@@ -155,7 +155,7 @@ func runGrpcServer(cfg initializers.Config, db *gorm.DB, log zerolog.Logger) {
 	server := grpc_handler.NewServer(userService)
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterOrderGrpcServer(grpcServer, server)
+	pb.RegisterInventoryGrpcServer(grpcServer, server)
 	reflection.Register(grpcServer)
 
 	grpcServerAddress := fmt.Sprintf("%s:%s", cfg.MERCHANT_GRPC_SERVER_HOST, cfg.MERCHANT_GRPC_SERVER_PORT)

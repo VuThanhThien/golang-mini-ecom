@@ -11,7 +11,7 @@ import (
 
 type Server struct {
 	InventoryService services.IInventoryService
-	pb.UnimplementedOrderGrpcServer
+	pb.UnimplementedInventoryGrpcServer
 }
 
 func NewServer(InventoryService services.IInventoryService) *Server {
@@ -21,7 +21,7 @@ func NewServer(InventoryService services.IInventoryService) *Server {
 	return &server
 }
 
-func (server *Server) UpdateInventory(_ context.Context, input *pb.UpdateInventoryRequest) (*emptypb.Empty, error) {
+func (server *Server) DeductQuantity(_ context.Context, input *pb.UpdateInventoryRequest) (*emptypb.Empty, error) {
 	order := input.GetOrder()
 	items := order.GetItems()
 	mapItemsToDTO := func(items []*pb.Item) []dto.Item {
@@ -41,7 +41,7 @@ func (server *Server) UpdateInventory(_ context.Context, input *pb.UpdateInvento
 		return dtoItems
 	}
 
-	dto := &dto.CreateOrderSucceed{
+	dto := &dto.CreateOrder{
 		ID:          uint(order.Id),
 		OrderID:     order.OrderId,
 		UserID:      uint(order.UserId),
@@ -52,8 +52,57 @@ func (server *Server) UpdateInventory(_ context.Context, input *pb.UpdateInvento
 		Items:       mapItemsToDTO(items),
 	}
 
-	err := server.InventoryService.CreateOrderSucceed(dto)
+	err := server.InventoryService.DeductQuantity(dto)
 
 	return &emptypb.Empty{}, err
 
+}
+
+func (server *Server) RefundQuantity(_ context.Context, input *pb.UpdateInventoryRequest) (*emptypb.Empty, error) {
+	order := input.GetOrder()
+	items := order.GetItems()
+	mapItemsToDTO := func(items []*pb.Item) []dto.Item {
+		dtoItems := make([]dto.Item, len(items))
+		for i, item := range items {
+			dtoItems[i] = dto.Item{
+				ID:         uint(item.Id),
+				OrderID:    uint(item.OrderId),
+				ProductID:  uint(item.ProductId),
+				VariantID:  uint(item.VariantId),
+				Name:       item.Name,
+				Quantity:   int(item.Quantity),
+				Price:      float64(item.Price),
+				TotalPrice: float64(item.TotalPrice),
+			}
+		}
+		return dtoItems
+	}
+
+	dto := &dto.CreateOrder{
+		ID:          uint(order.Id),
+		OrderID:     order.OrderId,
+		UserID:      uint(order.UserId),
+		PaymentID:   uint(order.PaymentId),
+		Status:      order.Status,
+		TotalAmount: float64(order.TotalAmount),
+		PlacedAt:    order.PlacedAt,
+		Items:       mapItemsToDTO(items),
+	}
+
+	err := server.InventoryService.RefundQuantity(dto)
+
+	return &emptypb.Empty{}, err
+}
+
+func (server *Server) GetInventory(ctx context.Context, input *pb.GetInventoryRequest) (*pb.Inventory, error) {
+	id := input.GetId()
+	inventory, err := server.InventoryService.GetInventoryByVariantID(uint(id))
+	if err != nil {
+		return nil, err
+	}
+	return &pb.Inventory{
+		Id:        uint64(inventory.ID),
+		VariantId: uint64(inventory.VariantID),
+		Quantity:  uint64(inventory.Quantity),
+	}, nil
 }

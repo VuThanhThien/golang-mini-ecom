@@ -11,7 +11,8 @@ type IInventoryService interface {
 	GetInventoryByVariantID(variantID uint) (*models.Inventory, error)
 	CreateInventory(dto *dto.InventoryDTO) (*models.Inventory, error)
 	DeleteInventory(id uint) error
-	CreateOrderSucceed(dto *dto.CreateOrderSucceed) error
+	DeductQuantity(dto *dto.CreateOrder) error
+	RefundQuantity(dto *dto.CreateOrder) error
 }
 
 type InventoryService struct {
@@ -61,7 +62,8 @@ func (s *InventoryService) DeleteInventory(id uint) error {
 	return s.inventoryRepository.Delete(id)
 }
 
-func (s *InventoryService) CreateOrderSucceed(dto *dto.CreateOrderSucceed) error {
+// CreateOrderSucceed deduct product quantity when order was created
+func (s *InventoryService) DeductQuantity(dto *dto.CreateOrder) error {
 
 	for _, item := range dto.Items {
 		inventory, err := s.inventoryRepository.GetByVariantID(item.VariantID)
@@ -75,5 +77,21 @@ func (s *InventoryService) CreateOrderSucceed(dto *dto.CreateOrderSucceed) error
 		}
 	}
 
+	return nil
+}
+
+// RefundOrder refund product was deducted when order was created
+func (s *InventoryService) RefundQuantity(dto *dto.CreateOrder) error {
+	for _, item := range dto.Items {
+		inventory, err := s.inventoryRepository.GetByVariantID(item.VariantID)
+		if err != nil {
+			return err
+		}
+		inventory.Quantity += item.Quantity
+		err = s.inventoryRepository.Update(inventory)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }

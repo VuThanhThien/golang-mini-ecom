@@ -32,35 +32,50 @@ func (r *OrderRepository) GetByOrderId(orderId string) (*models.Order, error) {
 	return &order, nil
 }
 
-func (r *OrderRepository) GetOrders(dto dto.GetOrderRequestDto) ([]models.Order, error) {
+func (r *OrderRepository) GetOrders(orderDto dto.GetOrderRequestDto, page, pageSize int) (*dto.PaginationResult, error) {
 	var orders []models.Order
-	query := r.GetDB().Preload("Items")
+	query := r.GetDB().Model(&models.Order{}).Preload("Items")
 
-	if dto.UserID != 0 {
-		query = query.Where("user_id = ?", dto.UserID)
+	if orderDto.UserID != 0 {
+		query = query.Where("user_id = ?", orderDto.UserID)
 	}
 
-	if dto.MerchantID != 0 {
-		query = query.Where("merchant_id = ?", dto.MerchantID)
+	if orderDto.MerchantID != 0 {
+		query = query.Where("merchant_id = ?", orderDto.MerchantID)
 	}
 
-	if dto.Status != "" {
-		query = query.Where("status = ?", dto.Status)
+	if orderDto.Status != "" {
+		query = query.Where("status = ?", orderDto.Status)
 	}
 
-	if dto.PaymentID != 0 {
-		query = query.Where("payment_id = ?", dto.PaymentID)
+	if orderDto.PaymentID != 0 {
+		query = query.Where("payment_id = ?", orderDto.PaymentID)
 	}
 
-	if dto.OrderID != 0 {
-		query = query.Where("order_id = ?", dto.OrderID)
+	if orderDto.OrderID != 0 {
+		query = query.Where("order_id = ?", orderDto.OrderID)
 	}
 
-	err := query.Find(&orders).Error
+	var total int64
+	err := query.Count(&total).Error
 	if err != nil {
 		return nil, err
 	}
-	return orders, nil
+
+	offset := (page - 1) * pageSize
+	totalPages := int((total + int64(pageSize) - 1) / int64(pageSize))
+
+	err = query.Limit(pageSize).Offset(offset).Find(&orders).Error
+	if err != nil {
+		return nil, err
+	}
+	return &dto.PaginationResult{
+		Data:       orders,
+		TotalItems: total,
+		TotalPages: totalPages,
+		Page:       page,
+		PageSize:   pageSize,
+	}, nil
 }
 
 func (r *OrderRepository) CreateWithTx(tx *gorm.DB, order *models.Order) error {
