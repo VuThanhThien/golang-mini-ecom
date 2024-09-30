@@ -7,6 +7,6 @@ import (
 type ProductImage struct {
 	gorm.Model
 	ProductID uint   `gorm:"index"`
-	ImageURL  string `gorm:"type:varchar(255)"`
+	ImageURL  string `gorm:"type:text"`
 	IsPrimary bool   `gorm:"default:false"`
 }

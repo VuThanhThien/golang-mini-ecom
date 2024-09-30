@@ -19,11 +19,11 @@ func NewPaymentController(service services.PaymentServiceInterface) *PaymentCont
 
 // CreatePayment godoc
 //
-// @Summary		CreatePayment
-// @Description	CreatePayment
+// @Summary			CreatePayment
+// @Description		CreatePayment
 // @Tags			Payments
 // @Accept			json
-// @Produce		json
+// @Produce			json
 // @Param			payment	body		dto.CreatePaymentDto	true	"payment"
 // @Security		Bearer
 // @Router			/payments [post]
@@ -31,13 +31,13 @@ func NewPaymentController(service services.PaymentServiceInterface) *PaymentCont
 func (c *PaymentController) CreatePayment(ctx *gin.Context) {
 	var input dto.CreatePaymentDto
 	if err := ctx.ShouldBindJSON(&input); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
 	payment, err := c.service.CreatePayment(input)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
@@ -46,13 +46,13 @@ func (c *PaymentController) CreatePayment(ctx *gin.Context) {
 
 // ListPayments godoc
 //
-// @Summary		ListPayments
-// @Description	List payments with optional filtering and pagination
+// @Summary			ListPayments
+// @Description		List payments with optional filtering and pagination
 // @Tags			Payments
 // @Accept			json
-// @Produce		json
-// @Param filter query dto.FilterPaymentDto false "Filter parameters"
-// @Param _ query dto.PaginationDto false "PaginationDto"
+// @Produce			json
+// @Param			filter	query		dto.FilterPaymentDto	false	"Filter parameters"
+// @Param			_			query		dto.PaginationDto	false	"PaginationDto"
 // @Security		Bearer
 // @Router			/payments [get]
 // @Success		200	{object}	object
@@ -62,8 +62,23 @@ func (c *PaymentController) ListPayments(ctx *gin.Context) {
 	var filter dto.FilterPaymentDto
 
 	if err := ctx.ShouldBindQuery(&filter); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
+	}
+
+	status := ctx.Query("status")
+	if status != "" {
+		filter.Status = dto.PaymentStatus(status)
+	}
+
+	currency := ctx.Query("currency")
+	if currency != "" {
+		filter.Currency = dto.Currency(currency)
+	}
+
+	method := ctx.Query("method")
+	if method != "" {
+		filter.Method = dto.PaymentMethod(method)
 	}
 
 	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
@@ -74,10 +89,9 @@ func (c *PaymentController) ListPayments(ctx *gin.Context) {
 	if pageSize < 1 || pageSize > 100 {
 		pageSize = 10
 	}
-
 	payments, err := c.service.ListPayments(filter, page, pageSize)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
@@ -86,11 +100,11 @@ func (c *PaymentController) ListPayments(ctx *gin.Context) {
 
 // ReadPayment godoc
 //
-// @Summary		ReadPayment
-// @Description	Read a payment by ID
+// @Summary			ReadPayment
+// @Description		Read a payment by ID
 // @Tags			Payments
 // @Accept			json
-// @Produce		json
+// @Produce			json
 // @Param			id	path		int	true	"Payment ID"
 // @Security		Bearer
 // @Router			/payments/{id} [get]
@@ -106,7 +120,7 @@ func (c *PaymentController) ReadPayment(ctx *gin.Context) {
 
 	payment, err := c.service.ReadPayment(uint(readIdRequest.ID))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
@@ -115,11 +129,11 @@ func (c *PaymentController) ReadPayment(ctx *gin.Context) {
 
 // ReadByOrderId godoc
 //
-// @Summary		ReadByOrderId
-// @Description	Read payments by order ID
+// @Summary			ReadByOrderId
+// @Description		Read payments by order ID
 // @Tags			Payments
 // @Accept			json
-// @Produce		json
+// @Produce			json
 // @Param			id	path		int	true	"Order ID"
 // @Security		Bearer
 // @Router			/api/payments/order/{id} [get]
@@ -135,7 +149,7 @@ func (c *PaymentController) ReadByOrderId(ctx *gin.Context) {
 
 	payments, err := c.service.ReadByOrderId(uint(readIdRequest.ID))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 

@@ -122,11 +122,11 @@ func (c *InventoryController) DeleteInventory(ctx *gin.Context) {
 // @Tags Inventory
 // @Accept json
 // @Produce json
-// @Param orderSucceed body dto.CreateOrder true "Order succeed details"
-// @Success 200 {object} dto.CreateOrder
+// @Param orderSucceed body dto.CreatedOrder true "Order succeed details"
+// @Success 200 {object} dto.CreatedOrder
 // @Router /inventory/order-succeed [post]
 func (c *InventoryController) DeductQuantity(ctx *gin.Context) {
-	var orderSucceed dto.CreateOrder
+	var orderSucceed dto.CreatedOrder
 	if err := ctx.ShouldBindJSON(&orderSucceed); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -147,11 +147,11 @@ func (c *InventoryController) DeductQuantity(ctx *gin.Context) {
 // @Tags Inventory
 // @Accept json
 // @Produce json
-// @Param orderFailed body dto.CreateOrder true "Order failed details"
-// @Success 200 {object} dto.CreateOrder
+// @Param orderFailed body dto.CreatedOrder true "Order failed details"
+// @Success 200 {object} dto.CreatedOrder
 // @Router /inventory/order-failed [post]
 func (c *InventoryController) RefundQuantity(ctx *gin.Context) {
-	var orderFailed dto.CreateOrder
+	var orderFailed dto.CreatedOrder
 	if err := ctx.ShouldBindJSON(&orderFailed); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return

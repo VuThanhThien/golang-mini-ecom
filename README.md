@@ -21,45 +21,91 @@ To install Ale Ecom, you need to have Go and Docker installed on your machine.
 - Docker (20.10 or later)
 - Docker Compose (2.10 or later)
 
-### Installation
+### Steps
 
 1. Clone the repository:
    ```
-   git clone https://github.com/your-username/ale-ecom.git
+   git clone https://github.com/VuThanhThien/my-go-boilerplate
    ```
 
 2. Change to the project directory:
    ```
-   
+   cd authentication
    ```
 
-3. Build the project:
+3. Install dependencies:
    ```
-   
+   make install
    ```
 
-4. Run the project:
+4. Create network for docker:
    ```
-   
+   make network
    ```
+
+5. Create postgres for dev:
+   ```
+   make postgres
+   ```
+
+6. Configure auto-migration:
+   - If you want to use auto migrate, create a new database and change the env file:
+     ```
+     ENABLE_AUTO_MIGRATE=true
+     ```
+   - Otherwise, apply the migration manually:
+     ```
+     make migration-up
+     ```
+
+7. Create new migration file:
+   ```
+   make migration-new name=create_user_table
+   ```
+
+8. Generate proto:
+   ```
+   make proto
+   ```
+
+9. Generate swagger:
+   ```
+   make docs
+   ```
+
+10. Build the project:
+    ```
+    make build
+    ```
+
+11. Run the project:
+    ```
+    make run
+    ```
 
 ## Usage
 
-To use Ale Ecom, you need to have the following environment variables set:  
+Ale Ecom consists of the following services:
 
+### Authentication Service
+- Create user accounts
+- Handle user authorization
+- Manage user data
+- Provide token validation endpoints for other services
 
+### Merchant Service
+- Manage products, variants, categories, and inventory
+- Update inventory quantities
+- Retrieve product lists and details
 
-Service:
+### Order Service
+- Process order creation
+- Manage inventory during order lifecycle
+- Provide order-related endpoints (details, lists, user-specific orders)
 
-- Authentication service:
-   - Allow create user
-   - Decentralization
-   - Manage users
-   - Provide endpoint to other services validate token
-- Merchant service:
-   - Manage product, variant, categories, inventory,...
-   - Provide endpoint to update inventory quantity
-- Order service:
-   - Allow user to create order
-   - Update inventory when create order success
+### Payment Service
+- Handle user payments
+- Update order status based on payment results
+
+Each service requires specific environment variables to be set for proper operation. Refer to the individual service documentation for detailed configuration instructions.
 

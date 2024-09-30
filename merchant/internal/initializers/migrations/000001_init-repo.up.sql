@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS variants (
 CREATE TABLE IF NOT EXISTS product_images (
     id BIGSERIAL PRIMARY KEY,
     product_id BIGINT,
-    image_url VARCHAR(255),
+    image_url  TEXT,
     is_primary BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP,
     updated_at TIMESTAMP,

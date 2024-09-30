@@ -28,12 +28,12 @@ func (s OrderStatus) String() string {
 }
 
 type ItemDto struct {
-	ProductID  uint    `json:"product_id"`
-	VariantID  uint    `json:"variant_id"`
-	Name       string  `json:"name"`
-	Quantity   int     `json:"quantity"`
-	Price      float64 `json:"price"`
-	TotalPrice float64 `json:"total_price"`
+	ProductID  uint    `json:"product_id" example:"1"`
+	VariantID  uint    `json:"variant_id" example:"1"`
+	Name       string  `json:"name" example:"Quần"`
+	Quantity   int     `json:"quantity" example:"1"`
+	Price      float64 `json:"price" example:"100000"`
+	TotalPrice float64 `json:"total_price" example:"100000"`
 }
 
 type GetOrderRequestDto struct {
@@ -58,9 +58,9 @@ type GetOrderResponseDto struct {
 }
 
 type CreateOrderRequestDto struct {
-	OrderID     string    `json:"order_id" validate:"required"`
-	UserID      uint      `json:"user_id" validate:"required"`
-	TotalAmount float64   `json:"total_amount" validate:"required"`
+	OrderID     string    `json:"order_id" validate:"required" example:"ORDER-123456"`
+	UserID      uint      `json:"user_id" validate:"required" example:"1"`
+	TotalAmount float64   `json:"total_amount" validate:"required" example:"100000"`
 	Items       []ItemDto `json:"items" validate:"required"`
 }
 
@@ -74,8 +74,8 @@ type CreateOrderResponseDto struct {
 }
 
 type UpdateOrderRequestDto struct {
-	ID     uint        `json:"id" validate:"required"`
-	Status OrderStatus `json:"status" validate:"required"`
+	ID     uint        `json:"id" validate:"required" example:"1"`
+	Status OrderStatus `json:"status" validate:"required" example:"PAID"`
 }
 
 type PaginationResult struct {

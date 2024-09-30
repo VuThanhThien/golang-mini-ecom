@@ -3,7 +3,7 @@ package dto
 import "time"
 
 type Item struct {
-	ID         uint      `json:"id"`
+	ID         uint      `json:"id" `
 	OrderID    uint      `json:"order_id"`
 	ProductID  uint      `json:"product_id"`
 	VariantID  uint      `json:"variant_id"`
@@ -16,7 +16,7 @@ type Item struct {
 	DeletedAt  time.Time `json:"deleted_at"`
 }
 
-type CreateOrder struct {
+type CreatedOrder struct {
 	ID          uint    `json:"id"`
 	OrderID     string  `json:"order_id"`
 	UserID      uint    `json:"user_id"`

@@ -15,7 +15,7 @@
 # vendor/
 .DS_Store
 TODO.md
-logs.txt
+gin.log
 .idea/
 secret.md
 tmp/

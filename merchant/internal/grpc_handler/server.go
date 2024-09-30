@@ -41,7 +41,7 @@ func (server *Server) DeductQuantity(_ context.Context, input *pb.UpdateInventor
 		return dtoItems
 	}
 
-	dto := &dto.CreateOrder{
+	dto := &dto.CreatedOrder{
 		ID:          uint(order.Id),
 		OrderID:     order.OrderId,
 		UserID:      uint(order.UserId),
@@ -78,7 +78,7 @@ func (server *Server) RefundQuantity(_ context.Context, input *pb.UpdateInventor
 		return dtoItems
 	}
 
-	dto := &dto.CreateOrder{
+	dto := &dto.CreatedOrder{
 		ID:          uint(order.Id),
 		OrderID:     order.OrderId,
 		UserID:      uint(order.UserId),

@@ -51,7 +51,7 @@ func (r *UserRepository) List(dto dto.ListUserDto, pagination dto.PaginationDto)
 		clauses = append(clauses, clause.Eq{Column: "provider", Value: dto.Provider})
 	}
 	if dto.Role != "" {
-		clauses = append(clauses, clause.Eq{Column: "role", Value: dto.Provider})
+		clauses = append(clauses, clause.Eq{Column: "role", Value: dto.Role})
 	}
 
 	err := r.db.Model(&models.User{}).Clauses(clauses...).Count(&total).Error

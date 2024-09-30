@@ -22,6 +22,7 @@ const (
 	CurrencyGBP Currency = "GBP"
 	CurrencyJPY Currency = "JPY"
 	CurrencyCNY Currency = "CNY"
+	CurrencyVND Currency = "VND"
 )
 
 type PaymentMethod string
@@ -34,22 +35,22 @@ const (
 )
 
 type CreatePaymentDto struct {
-	OrderID       uint          `json:"order_id" binding:"required"`
-	Amount        float64       `json:"amount" binding:"required"`
-	Currency      Currency      `json:"currency" binding:"required"`
-	Method        PaymentMethod `json:"method" binding:"required"`
-	Status        PaymentStatus `json:"status" binding:"required"`
-	TransactionID string        `json:"transaction_id"`
+	OrderID       uint          `json:"order_id" binding:"required" validate:"required" example:"1"`
+	Amount        float64       `json:"amount" binding:"required" validate:"required" example:"100000"`
+	Currency      Currency      `json:"currency" binding:"required" validate:"required" example:"USD"`
+	Method        PaymentMethod `json:"method" binding:"required" validate:"required" example:"CREDIT_CARD"`
+	Status        PaymentStatus `json:"status" binding:"required" validate:"required" example:"PENDING"`
+	TransactionID string        `json:"transaction_id" binding:"required" validate:"required" example:"1234567890"`
 }
 type CreatePaymentInput struct {
-	PaymentID     string        `json:"payment_id" binding:"required"`
-	OrderID       uint          `json:"order_id" binding:"required"`
-	Amount        float64       `json:"amount" binding:"required"`
-	Currency      Currency      `json:"currency" binding:"required"`
-	Method        PaymentMethod `json:"method" binding:"required"`
-	Status        PaymentStatus `json:"status" binding:"required"`
-	TransactionID string        `json:"transaction_id"`
-	PaidAt        time.Time     `json:"paid_at"`
+	PaymentID     string        `json:"payment_id" binding:"required" validate:"required" example:"1234567890"`
+	OrderID       uint          `json:"order_id" binding:"required" validate:"required" example:"1"`
+	Amount        float64       `json:"amount" binding:"required" validate:"required" example:"100000"`
+	Currency      Currency      `json:"currency" binding:"required" validate:"required" example:"USD"`
+	Method        PaymentMethod `json:"method" binding:"required" validate:"required" example:"CREDIT_CARD"`
+	Status        PaymentStatus `json:"status" binding:"required" validate:"required" example:"PENDING"`
+	TransactionID string        `json:"transaction_id" binding:"required" validate:"required" example:"1234567890"`
+	PaidAt        time.Time     `json:"paid_at" example:"2024-01-01T00:00:00Z"`
 }
 
 type FilterPaymentDto struct {

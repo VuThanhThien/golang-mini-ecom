@@ -133,7 +133,7 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 		rabbitmq.CREATE_ORDER_ROUTING_KEY,
 	)
 	go func() {
-		err := userConsumer.ConsumeMessage(dto.CreateOrder{}, &OrderDependencies)
+		err := userConsumer.ConsumeMessage(dto.CreatedOrder{}, &OrderDependencies)
 		if err != nil {
 			log.Error().Err(err).Msg("Consume message error")
 		}

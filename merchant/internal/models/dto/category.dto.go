@@ -3,9 +3,9 @@ package dto
 import "github.com/VuThanhThien/golang-gorm-postgres/merchant/internal/models"
 
 type CategoryDTO struct {
-	Name        string `json:"name" binding:"required"`
-	Description string `json:"description"`
-	ParentID    *uint  `json:"parentId,omitempty"`
+	Name        string `json:"name" binding:"required" example:"Quần bò"`
+	Description string `json:"description" example:"Quần bò polyeste"`
+	ParentID    *uint  `json:"parentId,omitempty" example:"1"`
 }
 
 type CategoryResponse struct {

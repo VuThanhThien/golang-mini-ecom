@@ -72,7 +72,7 @@ func (r *PaymentRepository) ListPaymentsWithFilter(filterDTO dto.FilterPaymentDt
 	if !filterDTO.PaidAt.IsZero() {
 		query = query.Where("paid_at = ?", filterDTO.PaidAt)
 	}
-
+	fmt.Println(filterDTO)
 	var total int64
 	if err := query.Count(&total).Error; err != nil {
 		return nil, fmt.Errorf("error counting total payments: %w", err)

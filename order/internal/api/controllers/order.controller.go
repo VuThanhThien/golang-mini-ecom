@@ -33,6 +33,10 @@ func (c *OrderController) GetOrders(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	status := ctx.Query("status")
+	if status != "" {
+		getOrderDto.Status = dto.OrderStatus(status)
+	}
 	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("pageSize", "10"))
 	if page < 1 {
