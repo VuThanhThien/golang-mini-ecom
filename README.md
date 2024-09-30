@@ -4,10 +4,14 @@
 
 Ale Ecom is a microservice architecture that provides a RESTful API for an e-commerce platform. It is built with Go and uses gRPC for communication between services. It is designed to be scalable and can be deployed on any cloud platform.
 
+![Ale Ecom Architecture](https://repository-images.githubusercontent.com/848972506/83f2645c-26ae-486a-a9e5-e19cf1ebcef7)
+
 ## Table of Contents
 
 - [Installation](#installation)
 - [Usage](#usage)
+
+
 
 ## Installation
 
@@ -132,6 +136,4 @@ Each service requires specific environment variables to be set for proper operat
 - logger: a logging tool, attach request id to log, save log to file 
 -
 
-Ale Ecom Architecture
 
-![Ale Ecom Architecture](https://repository-images.githubusercontent.com/848972506/83f2645c-26ae-486a-a9e5-e19cf1ebcef7)
