@@ -92,6 +92,7 @@ Ale Ecom consists of the following services:
 - Handle user authorization
 - Manage user data
 - Provide token validation endpoints for other services
+- Attach user token to cookie in HTTP response
 
 ### Merchant Service
 - Manage products, variants, categories, and inventory
@@ -106,6 +107,13 @@ Ale Ecom consists of the following services:
 ### Payment Service
 - Handle user payments
 - Update order status based on payment results
+
+### Communication Service
+- Validate user data: 
+   - Check if user is valid by calling Authentication Service through gRPC
+- Send data to other services:
+   - Deduction/increase inventory from Merchant Service when user buy products through Order Service by using gRPC
+   - Update order status from Payment Service when user buy products through Order Service by using RabbitMQ
 
 Each service requires specific environment variables to be set for proper operation. Refer to the individual service documentation for detailed configuration instructions.
 
