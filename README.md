@@ -132,3 +132,6 @@ Each service requires specific environment variables to be set for proper operat
 - logger: a logging tool, attach request id to log, save log to file 
 -
 
+Ale Ecom Architecture
+
+![Ale Ecom Architecture](https://repository-images.githubusercontent.com/848972506/83f2645c-26ae-486a-a9e5-e19cf1ebcef7)
