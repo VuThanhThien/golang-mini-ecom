@@ -31,24 +31,31 @@ To install Ale Ecom, you need to have Go and Docker installed on your machine.
 2. Change to the project directory:
    ```
    cd authentication
+   cd merchant
+   cd ...
    ```
 
-3. Install dependencies:
+3. Create app.env from example:
+   ```
+   cp app.env.example app.env
+   ```
+
+4. Install dependencies:
    ```
    make install
    ```
 
-4. Create network for docker:
+5. Create network for docker:
    ```
    make network
    ```
 
-5. Create postgres for dev:
+6. Create postgres for dev:
    ```
    make postgres
    ```
 
-6. Configure auto-migration:
+7. Configure auto-migration:
    - If you want to use auto migrate, create a new database and change the env file:
      ```
      ENABLE_AUTO_MIGRATE=true
@@ -58,27 +65,27 @@ To install Ale Ecom, you need to have Go and Docker installed on your machine.
      make migration-up
      ```
 
-7. Create new migration file:
+8. Create new migration file:
    ```
    make migration-new name=create_user_table
    ```
 
-8. Generate proto:
+9. Generate proto:
    ```
    make proto
    ```
 
-9. Generate swagger:
-   ```
-   make docs
-   ```
+10. Generate swagger:
+    ```
+    make docs
+    ```
 
-10. Build the project:
+11. Build the project:
     ```
     make build
     ```
 
-11. Run the project:
+12. Run the project:
     ```
     make run
     ```
@@ -109,11 +116,21 @@ Ale Ecom consists of the following services:
 - Update order status based on payment results
 
 ### Communication Service
-- Validate user data: 
-   - Check if user is valid by calling Authentication Service through gRPC
+- Validate user data:
+  - Check if user is valid by calling Authentication Service through gRPC
 - Send data to other services:
-   - Deduction/increase inventory from Merchant Service when user buy products through Order Service by using gRPC
-   - Update order status from Payment Service when user buy products through Order Service by using RabbitMQ
+  - Deduction/increase inventory from Merchant Service when user buy products through Order Service by using gRPC
+  - Update order status from Payment Service when user buy products through Order Service by using RabbitMQ
 
 Each service requires specific environment variables to be set for proper operation. Refer to the individual service documentation for detailed configuration instructions.
+
+# Ale Ecom is designed as a microservice architecture with the following key components:
+
+- grpc-gateway: a reverse proxy server that converts gRPC requests to HTTP/JSON and vice versa
+- postgres: a relational database
+- redis: an in-memory data structure store
+- rabbitmq: a message broker
+- swagger: a documentation tool
+- logger: a logging tool, attach request id to log, save log to file 
+-
 
