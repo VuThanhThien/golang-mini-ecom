@@ -8,8 +8,6 @@ Ale Ecom is a microservice architecture that provides a RESTful API for an e-com
 
 - [Installation](#installation)
 - [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Installation
 
