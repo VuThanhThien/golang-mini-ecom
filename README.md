@@ -134,6 +134,4 @@ Each service requires specific environment variables to be set for proper operat
 - rabbitmq: a message broker
 - swagger: a documentation tool
 - logger: a logging tool, attach request id to log, save log to file 
--
-
 
