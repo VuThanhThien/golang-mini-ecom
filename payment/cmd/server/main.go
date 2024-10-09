@@ -75,7 +75,7 @@ func main() {
 
 func runGinServer(config initializers.Config, log zerolog.Logger) {
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"http://localhost:" + config.ServerPort, config.ClientOrigin}
+	corsConfig.AllowOrigins = []string{"http://localhost:" + config.ServerPort, config.ClientOrigin, "http://localhost:" + config.GatewayPort}
 	corsConfig.AllowCredentials = true
 
 	// To implement a graceful shutdown while using Gin, you should create a http.Server

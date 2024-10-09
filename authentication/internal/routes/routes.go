@@ -14,17 +14,16 @@ import (
 func SetupRoutes(server *gin.Engine, db *gorm.DB) {
 	router := server.Group("/api")
 
-	router.GET("/healthcheck", func(ctx *gin.Context) {
-		message := "Welcome to Golang with Gorm and Postgres"
-		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
-	})
-
 	authRepo := repositories.NewAuthRepository(db)
 	authService := services.NewAuthService(authRepo)
 	authController := controllers.NewAuthController(db, authService)
 
 	authRouters := router.Group("/auth")
 	{
+		authRouters.GET("/healthcheck", func(ctx *gin.Context) {
+			message := "Service authentication is running..."
+			ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
+		})
 		authRouters.POST("/register", authController.SignUpUser)
 		authRouters.POST("/login", authController.SignInUser)
 		authRouters.GET("/refresh", authController.RefreshAccessToken)

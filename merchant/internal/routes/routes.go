@@ -42,12 +42,13 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 	merchantRepo := repositories.NewMerchantRepository(db)
 	merchantService := services.NewMerchantService(merchantRepo, createOrderPublisher)
 	merchantController := controllers.NewMerchantController(merchantService)
-	router.GET("/healthcheck", func(ctx *gin.Context) {
-		message := "Welcome to Golang with Gorm and Postgres"
-		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
-	})
+
 	merchantRoutes := router.Group("merchants")
 	{
+		merchantRoutes.GET("/healthcheck", func(ctx *gin.Context) {
+			message := "Service merchant is running..."
+			ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
+		})
 		merchantRoutes.GET("/:id", middleware.DeserializeUser(userGateway), merchantController.GetMerchant)
 		merchantRoutes.GET("/merchant-id/:merchantID", middleware.DeserializeUser(userGateway), merchantController.GetMerchantByMerchantID)
 		merchantRoutes.POST("/", middleware.DeserializeUser(userGateway), merchantController.CreateMerchant)

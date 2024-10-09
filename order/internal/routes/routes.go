@@ -45,12 +45,13 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 	orderItemRepo := repositories.NewItemRepository(db)
 	orderService := services.NewOrderService(orderRepo, orderItemRepo, createOrderPublisher, inventoryGateway)
 	orderController := controllers.NewOrderController(orderService)
-	router.GET("/healthcheck", func(ctx *gin.Context) {
-		message := "Welcome to Golang with Gorm and Postgres"
-		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
-	})
+
 	orderRoutes := router.Group("orders")
 	{
+		orderRoutes.GET("/healthcheck", func(ctx *gin.Context) {
+			message := "Service order is running..."
+			ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
+		})
 		orderRoutes.GET("/", middleware.DeserializeUser(userGateway), orderController.GetOrders)
 		orderRoutes.GET("/:id", middleware.DeserializeUser(userGateway), orderController.GetOrder)
 		orderRoutes.POST("/", middleware.DeserializeUser(userGateway), orderController.CreateOrder)

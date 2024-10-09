@@ -33,6 +33,8 @@ type Config struct {
 
 	UserGrpcServerHost string `mapstructure:"USER_GRPC_SERVER_HOST"`
 	UserGrpcServerPort string `mapstructure:"USER_GRPC_SERVER_PORT"`
+
+	GatewayPort string `mapstructure:"GATEWAY_PORT"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

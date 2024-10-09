@@ -81,7 +81,7 @@ func main() {
 
 func runGinServer(config initializers.Config, log zerolog.Logger) {
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"http://localhost:" + config.ServerPort, config.ClientOrigin}
+	corsConfig.AllowOrigins = []string{"http://localhost:" + config.ServerPort, config.ClientOrigin, "http://localhost:" + config.GatewayPort}
 	corsConfig.AllowCredentials = true
 
 	// To implement a graceful shutdown while using Gin, you should create a http.Server
@@ -103,7 +103,7 @@ func runGinServer(config initializers.Config, log zerolog.Logger) {
 	server.Use(gzip.Gzip(gzip.DefaultCompression))
 	server.Use(middleware.RateLimiter())
 	// add timestamp to name to avoid overwrite this log
-	f, _ := os.Create("tmp/gin.log")
+	f, _ := os.Create("tmp/authentication.log")
 	gin.DefaultWriter = io.MultiWriter(f)
 	server.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 		return fmt.Sprintf("[%s] %s - [%s] \"%s: %s %s %d\" %s %s\n",

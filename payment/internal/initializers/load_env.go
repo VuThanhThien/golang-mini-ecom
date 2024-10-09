@@ -35,6 +35,8 @@ type Config struct {
 
 	ORDER_GRPC_SERVER_PORT string `mapstructure:"ORDER_GRPC_SERVER_PORT"`
 	ORDER_GRPC_SERVER_HOST string `mapstructure:"ORDER_GRPC_SERVER_HOST"`
+
+	GatewayPort string `mapstructure:"GATEWAY_PORT"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

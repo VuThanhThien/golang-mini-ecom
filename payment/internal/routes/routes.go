@@ -36,12 +36,13 @@ func SetupRoutes(server *gin.Engine, db *gorm.DB, rabbitConn *amqp.Connection, l
 	paymentRepo := repositories.NewPaymentRepository(db)
 	paymentService := services.NewPaymentService(paymentRepo, paymentOrderCompletedPublisher)
 	paymentController := controllers.NewPaymentController(paymentService)
-	router.GET("/healthcheck", func(ctx *gin.Context) {
-		message := "Welcome to Golang with Gorm and Postgres"
-		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
-	})
+
 	paymentRoutes := router.Group("payments")
 	{
+		paymentRoutes.GET("/healthcheck", func(ctx *gin.Context) {
+			message := "Service payment is running..."
+			ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
+		})
 		paymentRoutes.GET("/", paymentController.ListPayments)
 		paymentRoutes.GET("/:id", paymentController.ReadPayment)
 		paymentRoutes.POST("/", paymentController.CreatePayment)
